@@ -14,12 +14,16 @@ import static java.util.Comparator.comparingInt;
 
 public class Indexer {
     private Map<String, List<Posting>> invertedIndex;
+    private int n_docs;
+    private String tokenizerName;
 
     /**
      * Creates a new instance of Indexer
      */
     public Indexer() {
         this.invertedIndex = new HashMap<>();
+        this.n_docs = 0;
+        this.tokenizerName = "";
     }
 
     /**
@@ -66,6 +70,7 @@ public class Indexer {
                 postingList.add(new Posting(docID, pair.getValue()));
             }
         }
+        n_docs++;
 
 
         System.out.println(temp);
@@ -154,7 +159,7 @@ public class Indexer {
 
             List<String> orderedKeys = invertedIndex.keySet().stream().sorted().collect(Collectors.toList());
 
-            writer.write(tokenizerName + "\n");
+            writer.write(tokenizerName + " " + n_docs + "\n");
 
             for (String key : orderedKeys) {
 
@@ -199,5 +204,21 @@ public class Indexer {
                 sorted(comparingInt(term -> invertedIndex.get(term).size()).reversed())
                 .collect(Collectors.toList());
         return (this.size() < 10) ? terms.subList(0, this.size()) : terms.subList(0, 10);
+    }
+
+    public int getN_docs() {
+        return n_docs;
+    }
+
+    public void setN_docs(int n_docs) {
+        this.n_docs = n_docs;
+    }
+
+    public String getTokenizerName() {
+        return tokenizerName;
+    }
+
+    public void setTokenizerName(String tokenizerName) {
+        this.tokenizerName = tokenizerName;
     }
 }

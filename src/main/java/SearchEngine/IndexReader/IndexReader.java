@@ -30,13 +30,21 @@ public class IndexReader {
      * @return a Indexer object that contains the index structure
      */
     public Indexer readIndex(String filename) {
+        int n_docs = 0;
+        String tokenizerName = "";
+
         Indexer indexer = new Indexer();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))){
             String line;
 
-            if ((line = reader.readLine()) != null)
-                tokenizerName = line.trim();
+            if ((line = reader.readLine()) != null) {
+                String[] s = line.split(" ");
+                //tirar tokenizer daqui e meter em index
+                tokenizerName = s[0];
+                n_docs = Integer.parseInt(s[1]);
+
+            }
 
             while ((line = reader.readLine()) != null) {
                 String[] s = line.split("[ ,]");
