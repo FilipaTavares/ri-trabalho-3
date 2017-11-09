@@ -46,7 +46,7 @@ public class DocumentSearcher {
         IndexReader indexReader = new IndexReader();
         Indexer indexer = indexReader.readIndex(index_file);
 
-        String tokenizerClassName = indexReader.getTokenizerName();
+        String tokenizerClassName = indexer.getTokenizerName();
         Tokenizer tokenizer = null;
         Class tokenizerClass;
 
@@ -89,7 +89,7 @@ public class DocumentSearcher {
         booleanRetrieval.setScoringAlgorithm(scoringAlgorithm);
 
         QueryProcessor processor = new QueryProcessor();
-        processor.processQueries(queries_file, booleanRetrieval, output_file);
+        //processor.processQueries(queries_file, booleanRetrieval, output_file);
 
         long elapsedTime = System.currentTimeMillis() - start;
         System.out.println("Execution time in ms: " + elapsedTime);

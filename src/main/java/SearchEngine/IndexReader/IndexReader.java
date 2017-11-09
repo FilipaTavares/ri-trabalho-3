@@ -5,24 +5,27 @@ import IndexerEngine.indexer.Posting;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class that reads and creates the index structure from an index file
  */
 public class IndexReader {
+    private List<Vector> vectors;
+    private Map<String,Integer> documentsFrequency;
     private String tokenizerName;
-
-    /**
-     * Returns the tokenizer class name
-     * 
-     * @return tokenizer class name
-     */
-    public String getTokenizerName() {
-        return tokenizerName;
+    private int nDocs;
+    
+    public IndexReader() {
+        this.vectors = new LinkedList<>();
+        this.documentsFrequency = new HashMap<>();
+        this.tokenizerName = "";
+        this.nDocs = 0;
     }
-
+        
     /**
      * Method that reads the index file parsing the first line to save the tokenizer name used and the remaining lines
      * to construct the index structure which is returned.
@@ -30,11 +33,9 @@ public class IndexReader {
      * @return a Indexer object that contains the index structure
      */
     public Indexer readIndex(String filename) {
-        int n_docs = 0;
-        String tokenizerName = "";
 
         Indexer indexer = new Indexer();
-
+        
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))){
             String line;
 
@@ -42,31 +43,48 @@ public class IndexReader {
                 String[] s = line.split(" ");
                 //tirar tokenizer daqui e meter em index
                 tokenizerName = s[0];
-                n_docs = Integer.parseInt(s[1]);
-
+                nDocs = Integer.parseInt(s[1]);
+                indexer.setN_docs(nDocs);
+                indexer.setTokenizerName(tokenizerName);
             }
 
             while ((line = reader.readLine()) != null) {
                 String[] s = line.split("[ ,]");
                 String term = s[0];
                 List<Posting> postings = new LinkedList<>();
-
+                int docFreq = 0;
                 for (int i = 1; i < s.length; i++) {
                     String[] split = s[i].split(":");
                     int docId;
-                    int termFreq;
+                    double wt;
                     try {
                         docId = Integer.parseInt(split[0]);
-                        termFreq = Integer.parseInt(split[1]);
+                        wt = Double.parseDouble(split[1]);
                     } catch (NumberFormatException e) {
                         System.err.println("Error processing posting from file");
                         System.out.println(Arrays.toString(split));
                         continue;
                     }
-
-                    postings.add(new Posting(docId, termFreq));
+                    
+                    boolean exists = false;
+                    for (Vector vector: vectors) {
+                        if (vector.getDocId() == docId) {
+                            vector.addTerm(term, wt);
+                            exists = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!exists) {
+                        Vector vector = new Vector(docId);
+                        vector.addTerm(term, wt);
+                        vectors.add(vector);
+                    }
+                    
+                    docFreq++;
+                    postings.add(new Posting(docId, wt));
                 }
-
+                documentsFrequency.put(term, docFreq);
                 indexer.addToIndex(term, postings);
             }
 
@@ -76,6 +94,22 @@ public class IndexReader {
         }
 
         return indexer;
+    }
+    
+    public List<Vector> getVectors(){
+        return vectors;
+    }
+    
+    public Map<String, Integer> getDocumentsFrequency(){
+        return documentsFrequency;
+    }
+    
+    public String getTokenizerName(){
+        return tokenizerName;
+    }
+    
+    public int getNDocs(){
+        return nDocs;
     }
 }
 

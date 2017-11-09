@@ -17,7 +17,7 @@ public class QueryProcessor {
      * @param outputFilename output filename to save the scores
      */
 
-    public void processQueries(String queriesFilename, BooleanRetrieval booleanRetrieval, String outputFilename){
+    public void processQueries(String queriesFilename, RankedRetrieval booleanRetrieval, String outputFilename){
 
         int query_id = 1;
         try (BufferedReader br = new BufferedReader(new FileReader(queriesFilename))) {
