@@ -12,16 +12,6 @@ import java.util.List;
  * Class that reads and creates the index structure from an index file
  */
 public class IndexReader {
-    private String tokenizerName;
-
-    /**
-     * Returns the tokenizer class name
-     * 
-     * @return tokenizer class name
-     */
-    public String getTokenizerName() {
-        return tokenizerName;
-    }
 
     /**
      * Method that reads the index file parsing the first line to save the tokenizer name used and the remaining lines
@@ -30,8 +20,6 @@ public class IndexReader {
      * @return a Indexer object that contains the index structure
      */
     public Indexer readIndex(String filename) {
-        int n_docs = 0;
-        String tokenizerName = "";
 
         Indexer indexer = new Indexer();
 
@@ -41,9 +29,10 @@ public class IndexReader {
             if ((line = reader.readLine()) != null) {
                 String[] s = line.split(" ");
                 //tirar tokenizer daqui e meter em index
-                tokenizerName = s[0];
-                n_docs = Integer.parseInt(s[1]);
-
+                String tokenizerName = s[0];
+                int n_docs = Integer.parseInt(s[1]);
+                indexer.setN_docs(n_docs);
+                indexer.setTokenizerName(tokenizerName);
             }
 
             while ((line = reader.readLine()) != null) {
@@ -54,17 +43,17 @@ public class IndexReader {
                 for (int i = 1; i < s.length; i++) {
                     String[] split = s[i].split(":");
                     int docId;
-                    int termFreq;
+                    double wt;
                     try {
                         docId = Integer.parseInt(split[0]);
-                        termFreq = Integer.parseInt(split[1]);
+                        wt = Double.parseDouble(split[1]);
                     } catch (NumberFormatException e) {
                         System.err.println("Error processing posting from file");
                         System.out.println(Arrays.toString(split));
                         continue;
                     }
 
-                    postings.add(new Posting(docId, termFreq));
+                    postings.add(new Posting(docId, wt));
                 }
 
                 indexer.addToIndex(term, postings);
