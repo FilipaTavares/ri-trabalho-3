@@ -11,10 +11,9 @@ public class CosineScore {
     public void computeScores(Query query, Map<String, Double> wtQuery, List<Vector> vectors) {
         for (Vector vector: vectors) {
             for (Map.Entry<String, Double> pair : wtQuery.entrySet()) {
-                double prod = pair.getValue()*vector.getTermWeight(pair.getKey());
+                double prod = pair.getValue() * vector.getTermWeight(pair.getKey());
                 query.increaseDocScore(vector.getDocId(), prod);
             }
         }
     }
-
 }

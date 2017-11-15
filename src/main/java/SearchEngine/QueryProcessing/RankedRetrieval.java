@@ -1,7 +1,7 @@
 package SearchEngine.QueryProcessing;
 
-import IndexerEngine.indexer.Indexer;
-import IndexerEngine.indexer.Posting;
+import IndexerEngine.indexer.IndexerWtNorm;
+import IndexerEngine.indexer.PostingWtNorm;
 import IndexerEngine.tokenizers.Tokenizer;
 import SearchEngine.ScoringAlgorithms.CosineScore;
 import SearchEngine.ScoringAlgorithms.ScoringAlgorithm;
@@ -12,19 +12,18 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RankedRetrieval {
 
     private List<Query> results;
-    private Indexer indexer;
+    private IndexerWtNorm indexer;
     private Tokenizer tokenizer;
     private ScoringAlgorithm scoringAlgorithm;
     private CosineScore score;
     private List<Vector> vectors;
 
-    public RankedRetrieval(Indexer indexer, Tokenizer tokenizer,
-            ScoringAlgorithm scoringAlgorithm, CosineScore score) {
+    public RankedRetrieval(IndexerWtNorm indexer, Tokenizer tokenizer,
+                           ScoringAlgorithm scoringAlgorithm, CosineScore score) {
         this.results = new LinkedList<>();
         this.indexer = indexer;
         this.tokenizer = tokenizer;
@@ -87,8 +86,8 @@ public class RankedRetrieval {
 
     private void fillVectors(List<String> terms) {
         for (String term : terms) {
-            List<Posting> postingList = indexer.getTermPostings(term);
-            for (Posting posting: postingList) {
+            List<PostingWtNorm> postingList = indexer.getTermPostings(term);
+            for (PostingWtNorm posting: postingList) {
                 Vector vector = new Vector(posting.getDocID());
                 vector.addTerm(term, posting.getWt_norm());
                 vectors.add(vector);

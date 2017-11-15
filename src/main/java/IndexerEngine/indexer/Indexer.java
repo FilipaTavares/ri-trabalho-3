@@ -1,84 +1,29 @@
 package IndexerEngine.indexer;
 
-import java.io.*;
-import java.util.*;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import static java.util.Comparator.comparingInt;
 
-/**
- * This class indexes a document in a data structure composed of an hashmap in which a key is a term and the value
- * a list of Postings
- *
- * @see Posting
- */
+public abstract class Indexer {
+    protected Map<String, List<Posting>> invertedIndex;
+    protected int n_docs;
+    protected String tokenizerName;
 
-public class Indexer {
-    private Map<String, List<Posting>> invertedIndex;
-    private int n_docs;
-    private String tokenizerName;
-
-    /**
-     * Creates a new instance of Indexer
-     */
     public Indexer() {
         this.invertedIndex = new HashMap<>();
         this.n_docs = 0;
         this.tokenizerName = "";
     }
 
+    public abstract void index(List<String> terms, int docID);
+
     /**
-     * Indexes a document given its list of terms and id
+     * Add to the index structure a new entry
      *
-     * @param terms list of terms of a document
-     * @param docID document id
-     */
-    public void index(List<String> terms, int docID) {
-        Map<String, Double> temp = new HashMap<>();
-
-        for (String term : terms) {
-
-            double count = temp.getOrDefault(term, 0.0);
-            temp.put(term, count + 1);
-        }
-
-        double sum_square_wt = 0.0;
-
-        for (Map.Entry<String, Double> pair : temp.entrySet()) {
-            //Arrendondar valor??
-            double wt = 1 + Math.log10(pair.getValue());
-            temp.put(pair.getKey(), wt);
-            sum_square_wt += Math.pow(wt, 2);
-        }
-
-        /* ou usar??
-        for (String key : map.keys()) {
-          map.put(key, ..(key));
-        }
-         */
-        double finalSum_square_wt = sum_square_wt;
-        temp.replaceAll((term, wt) -> wt / Math.sqrt(finalSum_square_wt));
-
-        for (Map.Entry<String, Double> pair : temp.entrySet()) {
-            if (!invertedIndex.containsKey(pair.getKey())) {
-                List<Posting> postingList = new LinkedList<>();
-                postingList.add(new Posting(docID, pair.getValue()));
-                invertedIndex.put(pair.getKey(), postingList);
-            }
-
-            else {
-                List<Posting> postingList = invertedIndex.get(pair.getKey());
-                postingList.add(new Posting(docID, pair.getValue()));
-            }
-        }
-        n_docs++;
-
-
-        System.out.println(temp);
-    }
-
-    /**
-     * Add to the index structure a new entry 
-     * 
      * @param term word that appear in the document
      * @param postings list of postings
      */
@@ -88,7 +33,7 @@ public class Indexer {
 
     /**
      * Get the list of postings of the term
-     * 
+     *
      * @param term word to obtain the list of postings
      * @return list of postings of the term
      */
@@ -106,9 +51,9 @@ public class Indexer {
     }
 
     /**
-     * String representation of this Indexer Object
+     * String representation of this IndexerWtNorm Object
      *
-     * @return a String representation of this Indexer Object
+     * @return a String representation of this IndexerWtNorm Object
      */
     @Override
     public String toString() {
@@ -122,8 +67,7 @@ public class Indexer {
      * @param tokenizerName tokenizer class name
      */
 
-    //FICAR COM ESTE MAIS PEQUENO
-    public void saveToFile2(String filename, String tokenizerName) {
+    public void saveToFile(String filename, String tokenizerName) {
 
         try(PrintWriter writer = new PrintWriter(filename)) {
             List<String> orderedKeys = invertedIndex.keySet().stream().sorted().collect(Collectors.toList());
@@ -148,62 +92,6 @@ public class Indexer {
             System.err.println("Unable to save index to file" + e);
         }
 
-    }
-
-    public void saveToFile(String filename, String tokenizerName) {
-        try {
-
-            OutputStreamWriter streamWriter = new OutputStreamWriter(new FileOutputStream(filename),
-                    "UTF-8");
-            BufferedWriter writer = new BufferedWriter(streamWriter);
-
-            List<String> orderedKeys = invertedIndex.keySet().stream().sorted().collect(Collectors.toList());
-
-            writer.write(tokenizerName + " " + n_docs + "\n");
-
-            for (String key : orderedKeys) {
-
-                StringBuilder builder = new StringBuilder(key).append(" ");
-
-                Collections.sort(invertedIndex.get(key));
-
-                invertedIndex.get(key).forEach(posting ->
-                        builder.append(posting.toString()).append(","));
-
-                String postingList = builder.toString();
-                postingList = postingList.substring(0, postingList.length() - 1);
-                writer.write(postingList);
-                writer.newLine();
-            }
-            writer.close();
-
-        } catch (IOException e) {
-            System.err.println("Unable to save index to file" + e);
-        }
-    }
-
-    /**
-     * Lists the ten first terms (in alphabetic order) that appear in only one document
-     *
-     * @return a list of the ten first terms (in alphabetic order) that appear in only one document
-     */
-    public List<String> getFirst10TermsInOneDoc() {
-        List<String> terms = invertedIndex.keySet().stream().sorted()
-                .filter((term) -> invertedIndex.get(term).size() == 1)
-                .collect(Collectors.toList());
-        return (this.size() < 10) ? terms.subList(0, this.size()) : terms.subList(0, 10);
-    }
-
-    /**
-     * Lists the ten terms with higher document frequency
-     *
-     * @return a list of the ten terms with higher document frequency
-     */
-    public List<String> getFirst10TermsWithHigherDocFreq() {
-        List<String> terms = invertedIndex.keySet().stream().
-                sorted(comparingInt(term -> invertedIndex.get(term).size()).reversed())
-                .collect(Collectors.toList());
-        return (this.size() < 10) ? terms.subList(0, this.size()) : terms.subList(0, 10);
     }
 
     public int getN_docs() {

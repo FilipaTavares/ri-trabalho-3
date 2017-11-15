@@ -1,6 +1,8 @@
 package SearchEngine.ScoringAlgorithms;
 
 import IndexerEngine.indexer.Posting;
+import IndexerEngine.indexer.PostingTermFreq;
+import IndexerEngine.indexer.PostingWtNorm;
 import SearchEngine.QueryProcessing.Query;
 
 import java.util.List;
@@ -21,6 +23,9 @@ public class FrequencyOfQueryWords implements ScoringAlgorithm {
 
     @Override
     public void computeScores(Query query, List<Posting> postings) {
-        //postings.forEach(posting ->  query.increaseDocScore(posting.getDocID(), posting.getTermFreq()) );
+        for (Posting posting1 : postings) {
+            PostingTermFreq posting = (PostingTermFreq) posting1;
+            query.increaseDocScore(posting.getDocID(), posting.getTermFreq());
+        }
     }
 }

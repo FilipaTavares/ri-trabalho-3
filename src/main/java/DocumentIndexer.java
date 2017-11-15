@@ -1,6 +1,6 @@
 import IndexerEngine.corpusReaders.CorpusReader;
 import IndexerEngine.corpusReaders.CranfieldReader;
-import IndexerEngine.indexer.Indexer;
+import IndexerEngine.indexer.IndexerWtNorm;
 import IndexerEngine.tokenizers.Tokenizer;
 import Pipelines.DocumentIndexerPipeline;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -33,7 +33,7 @@ public class DocumentIndexer {
         Namespace ns = parser.parseArgsOrFail(args);
 
         CorpusReader corpusReader = new CranfieldReader();
-        Indexer indexer = new Indexer();
+        IndexerWtNorm indexer = new IndexerWtNorm();
         File directory = new File(ns.getString("<directoryForFiles>"));
 
         String tokenizerClassName = ns.getString("<tokenizerClassName>");

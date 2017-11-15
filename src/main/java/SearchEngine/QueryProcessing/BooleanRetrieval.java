@@ -1,10 +1,9 @@
 package SearchEngine.QueryProcessing;
 
-import IndexerEngine.indexer.Indexer;
+import IndexerEngine.indexer.IndexerWtNorm;
 import IndexerEngine.tokenizers.Tokenizer;
 import SearchEngine.ScoringAlgorithms.ScoringAlgorithm;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,7 +12,7 @@ import java.util.List;
  */
 public abstract class BooleanRetrieval {
     protected List<Query> results;
-    protected Indexer indexer;
+    protected IndexerWtNorm indexer;
     protected Tokenizer tokenizer;
     protected ScoringAlgorithm scoringAlgorithm;
 
@@ -37,11 +36,11 @@ public abstract class BooleanRetrieval {
     public abstract void saveToFile(String filename);
 
     /**
-     * Store or modify the Indexer object
+     * Store or modify the IndexerWtNorm object
      * 
-     * @param indexer a new Indexer object
+     * @param indexer a new IndexerWtNorm object
      */
-    public void setIndexer(Indexer indexer) {
+    public void setIndexer(IndexerWtNorm indexer) {
         this.indexer = indexer;
     }
 

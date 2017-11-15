@@ -1,6 +1,7 @@
 package SearchEngine.QueryProcessing;
 
 import IndexerEngine.indexer.Posting;
+import IndexerEngine.indexer.PostingWtNorm;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Comparator;

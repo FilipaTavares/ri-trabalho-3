@@ -2,7 +2,7 @@ package Pipelines;
 
 import IndexerEngine.corpusReaders.CorpusReader;
 import IndexerEngine.documents.Document;
-import IndexerEngine.indexer.Indexer;
+import IndexerEngine.indexer.IndexerWtNorm;
 import IndexerEngine.tokenizers.Tokenizer;
 
 import java.io.File;
@@ -15,10 +15,10 @@ public class DocumentIndexerPipeline implements Pipeline{
     private File directory;
     private CorpusReader corpusReader;
     private Tokenizer tokenizer;
-    private Indexer indexer;
+    private IndexerWtNorm indexer;
     private String outputFileName;
 
-    public DocumentIndexerPipeline(File directory, CorpusReader corpusReader, Tokenizer tokenizer, Indexer indexer,
+    public DocumentIndexerPipeline(File directory, CorpusReader corpusReader, Tokenizer tokenizer, IndexerWtNorm indexer,
                                    String outputFileName) {
         this.directory = directory;
         this.corpusReader = corpusReader;
@@ -46,7 +46,7 @@ public class DocumentIndexerPipeline implements Pipeline{
         indexer.saveToFile(outputFileName, tokenizer.getClass().getSimpleName());
 
 
-        System.out.println("Indexer size: " + indexer.size() + "\n");
+        System.out.println("IndexerWtNorm size: " + indexer.size() + "\n");
 
         System.out.println("List of ten first terms that appear in only one document");
         List<String> termsInOneDoc = indexer.getFirst10TermsInOneDoc();
@@ -88,7 +88,7 @@ public class DocumentIndexerPipeline implements Pipeline{
      * Sets the indexer to be used by the pipeline
      * @param indexer indexer
      */
-    public void setIndexer(Indexer indexer) {
+    public void setIndexer(IndexerWtNorm indexer) {
         this.indexer = indexer;
     }
 

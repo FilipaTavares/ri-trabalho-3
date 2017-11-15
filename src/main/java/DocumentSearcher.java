@@ -1,6 +1,6 @@
-import IndexerEngine.indexer.Indexer;
+import IndexerEngine.indexer.IndexerWtNorm;
 import IndexerEngine.tokenizers.Tokenizer;
-import SearchEngine.IndexReader.IndexReader;
+import SearchEngine.IndexReader.IndexWtNormReader;
 import SearchEngine.QueryProcessing.BooleanRetrieval;
 import SearchEngine.QueryProcessing.DisjunctiveBooleanRetrieval;
 import SearchEngine.QueryProcessing.QueryProcessor;
@@ -43,8 +43,8 @@ public class DocumentSearcher {
         Namespace ns = parser.parseArgsOrFail(args);
 
         String index_file = ns.getString("<indexfile>");
-        IndexReader indexReader = new IndexReader();
-        Indexer indexer = indexReader.readIndex(index_file);
+        IndexWtNormReader indexReader = new IndexWtNormReader();
+        IndexerWtNorm indexer = indexReader.readIndex(index_file);
 
         String tokenizerClassName = indexer.getTokenizerName();
         Tokenizer tokenizer = null;

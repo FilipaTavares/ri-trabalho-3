@@ -1,6 +1,8 @@
 package SearchEngine.ScoringAlgorithms;
 
 import IndexerEngine.indexer.Posting;
+import IndexerEngine.indexer.PostingTermFreq;
+import IndexerEngine.indexer.PostingWtNorm;
 import SearchEngine.QueryProcessing.Query;
 
 import java.util.List;
