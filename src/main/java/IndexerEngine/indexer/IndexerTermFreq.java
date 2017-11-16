@@ -19,6 +19,7 @@ public class IndexerTermFreq extends Indexer {
      * @param terms list of terms of a document
      * @param docID document id
      */
+    @Override
     public void index(List<String> terms, int docID) {
 
         for (String term : terms) {
@@ -40,6 +41,7 @@ public class IndexerTermFreq extends Indexer {
                 }
             }
         }
+        n_docs++;
     }
 
     /**

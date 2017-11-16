@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Class that reads and creates the index structure from an index file
  */
-public class IndexWtNormReader {
+public class IndexWtNormReader implements IndexReader{
 
     /**
      * Method that reads the index file parsing the first line to save the tokenizer name used and the remaining lines
@@ -21,6 +21,7 @@ public class IndexWtNormReader {
      * @param filename index filename
      * @return a IndexerWtNorm object that contains the index structure
      */
+    @Override
     public Indexer readIndex(String filename) {
 
         Indexer indexer = new IndexerWtNorm();

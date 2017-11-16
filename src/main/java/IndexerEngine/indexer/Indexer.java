@@ -72,7 +72,7 @@ public abstract class Indexer {
         try(PrintWriter writer = new PrintWriter(filename)) {
             List<String> orderedKeys = invertedIndex.keySet().stream().sorted().collect(Collectors.toList());
 
-            writer.println(tokenizerName);
+            writer.println(tokenizerName + " " + n_docs);
 
             for (String key : orderedKeys) {
 

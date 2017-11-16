@@ -1,12 +1,12 @@
 package SearchEngine.QueryProcessing;
 
 import IndexerEngine.indexer.Posting;
-import IndexerEngine.indexer.PostingWtNorm;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class that implements a disjunctive (OR) Boolean Retrieval model
@@ -23,6 +23,7 @@ public class DisjunctiveBooleanRetrieval extends BooleanRetrieval {
      */
     @Override
     public void retrieve(int query_id, String query_text) {
+        long start = System.currentTimeMillis();
         List<String> terms = tokenizer.tokenize(query_text);
         List<Posting> allPostings = new LinkedList<>();
         for(String term : terms) {
@@ -32,6 +33,8 @@ public class DisjunctiveBooleanRetrieval extends BooleanRetrieval {
         Query query = new Query(query_id);
         scoringAlgorithm.computeScores(query, allPostings);
         results.add(query);
+        long queryThroughput = System.currentTimeMillis() - start;
+        evaluation.addQueryLatency(query_id, queryThroughput);
     }
 
     /**
@@ -58,5 +61,30 @@ public class DisjunctiveBooleanRetrieval extends BooleanRetrieval {
             System.err.println("Error writing results to file");
             System.exit(1);
         }
+    }
+
+    @Override
+    public void calculateMeasures(int queryId) {
+        Set<Integer> keySet = results.get(queryId-1).getDoc_scores().keySet();
+        evaluation.calculatePrecision(queryId, keySet);
+        evaluation.calculateRecall(queryId, keySet);
+        evaluation.calculateFmeasure(queryId);
+        evaluation.calculateAveragePrecision(queryId,keySet);
+        evaluation.calculateReciprocalRank(queryId, keySet);     
+    }
+    
+    @Override
+    public void printAllEvaluations() {
+        double map = evaluation.calculateMAP();
+        double map10 = evaluation.calculateMAPtoTen();
+        double mrr = evaluation.calculateMRR();
+        long mql = evaluation.calculateMedianQueryLatency();
+        int nQuery = evaluation.calculateQueryThroughput();
+        System.out.println(evaluation.toString());
+        System.out.printf("Mean Average Precision: %.5f\n",map);
+        System.out.printf("Mean Average Precision at Rank 10: %.5f\n",map10);
+        System.out.printf("Mean Reciprocal Rank: %.5f\n",mrr);
+        System.out.println("Query Throughput: "+nQuery);
+        System.out.println("Median Query Latency: "+mql+"\n");
     }
 }

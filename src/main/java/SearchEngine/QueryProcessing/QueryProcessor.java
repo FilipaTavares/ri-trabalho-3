@@ -13,22 +13,24 @@ public class QueryProcessor {
     /**
      * Method that reads and processes the queries saving the results to a file
      * @param queriesFilename the queries filename
-     * @param booleanRetrieval the boolean retrieval to be used to combine the queries' words
+     * @param retrieval the retrieval to be used
      * @param outputFilename output filename to save the scores
      */
 
-    public void processQueries(String queriesFilename, RankedRetrieval booleanRetrieval, String outputFilename){
+    public void processQueries(String queriesFilename, Retrieval retrieval, String outputFilename){
 
         int query_id = 1;
         try (BufferedReader br = new BufferedReader(new FileReader(queriesFilename))) {
 
             String line;
             while ((line = br.readLine()) != null) {
-                booleanRetrieval.retrieve(query_id++, line);
+                retrieval.retrieve(query_id, line);
+                retrieval.calculateMeasures(query_id++);
             }
 
             br.close();
-            booleanRetrieval.saveToFile(outputFilename);
+            retrieval.saveToFile(outputFilename);
+            retrieval.printAllEvaluations();
 
         } catch (IOException e) {
             System.err.println("Error reading queries file " + queriesFilename);

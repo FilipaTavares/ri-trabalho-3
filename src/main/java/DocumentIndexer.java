@@ -1,5 +1,6 @@
 import IndexerEngine.corpusReaders.CorpusReader;
 import IndexerEngine.corpusReaders.CranfieldReader;
+import IndexerEngine.indexer.Indexer;
 import IndexerEngine.indexer.IndexerWtNorm;
 import IndexerEngine.tokenizers.Tokenizer;
 import Pipelines.DocumentIndexerPipeline;
@@ -22,6 +23,7 @@ public class DocumentIndexer {
         parser.addArgument("<directoryForFiles>").type(Arguments.fileType().verifyIsDirectory())
                 .help("Corpus directory");
 
+        // se so é necessario o complex tokenizer pode se eliminar isto
         parser.addArgument("<tokenizerClassName>").metavar("<tokenizerClassName>").choices("ComplexTokenizer")
                 .setDefault("ComplexTokenizer").help("The tokenizer to be used given the following choices:\n" +
                 "ComplexTokenizer - splits the text on a sequence of one or more non alphanumeric characters and" +
@@ -33,7 +35,7 @@ public class DocumentIndexer {
         Namespace ns = parser.parseArgsOrFail(args);
 
         CorpusReader corpusReader = new CranfieldReader();
-        IndexerWtNorm indexer = new IndexerWtNorm();
+        Indexer indexer = new IndexerWtNorm();
         File directory = new File(ns.getString("<directoryForFiles>"));
 
         String tokenizerClassName = ns.getString("<tokenizerClassName>");

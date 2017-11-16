@@ -1,12 +1,17 @@
-import IndexerEngine.indexer.IndexerWtNorm;
+import IndexerEngine.indexer.Indexer;
 import IndexerEngine.tokenizers.Tokenizer;
+import SearchEngine.IndexReader.IndexReader;
 import SearchEngine.IndexReader.IndexWtNormReader;
 import SearchEngine.QueryProcessing.BooleanRetrieval;
 import SearchEngine.QueryProcessing.DisjunctiveBooleanRetrieval;
 import SearchEngine.QueryProcessing.QueryProcessor;
+import SearchEngine.QueryProcessing.RankedRetrieval;
+import SearchEngine.QueryProcessing.Retrieval;
+import SearchEngine.ScoringAlgorithms.CosineScore;
 import SearchEngine.ScoringAlgorithms.FrequencyOfQueryWords;
 import SearchEngine.ScoringAlgorithms.NumberOfQueryWords;
 import SearchEngine.ScoringAlgorithms.ScoringAlgorithm;
+import SearchEngine.Evaluation.Evaluation;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -43,8 +48,8 @@ public class DocumentSearcher {
         Namespace ns = parser.parseArgsOrFail(args);
 
         String index_file = ns.getString("<indexfile>");
-        IndexWtNormReader indexReader = new IndexWtNormReader();
-        IndexerWtNorm indexer = indexReader.readIndex(index_file);
+        IndexReader indexReader = new IndexWtNormReader();
+        Indexer indexer = indexReader.readIndex(index_file);
 
         String tokenizerClassName = indexer.getTokenizerName();
         Tokenizer tokenizer = null;
@@ -63,10 +68,10 @@ public class DocumentSearcher {
         }
 
         String queries_file = ns.getString("<queriesfile>");
-        String scoring_algorithm = ns.getString("<scoring_algorithm>");
+        //String scoring_algorithm = ns.getString("<scoring_algorithm>");
         String output_file = ns.getString("<outputfile>");
 
-        BooleanRetrieval booleanRetrieval = new DisjunctiveBooleanRetrieval();
+        /*BooleanRetrieval booleanRetrieval = new DisjunctiveBooleanRetrieval();
         booleanRetrieval.setIndexer(indexer);
         booleanRetrieval.setTokenizer(tokenizer);
 
@@ -86,10 +91,13 @@ public class DocumentSearcher {
                 break;
         }
 
-        booleanRetrieval.setScoringAlgorithm(scoringAlgorithm);
+        booleanRetrieval.setScoringAlgorithm(scoringAlgorithm);*/
+        Evaluation evaluation = new Evaluation("cranfield.query.relevance.txt");
+        CosineScore score = new CosineScore();
+        Retrieval retrieval = new RankedRetrieval(indexer, tokenizer, evaluation, score);
 
         QueryProcessor processor = new QueryProcessor();
-        //processor.processQueries(queries_file, booleanRetrieval, output_file);
+        processor.processQueries(queries_file, retrieval, output_file);
 
         long elapsedTime = System.currentTimeMillis() - start;
         System.out.println("Execution time in ms: " + elapsedTime);

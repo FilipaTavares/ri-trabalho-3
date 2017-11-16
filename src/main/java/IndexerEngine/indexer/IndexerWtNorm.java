@@ -16,7 +16,7 @@ public class IndexerWtNorm extends Indexer {
      * @param terms list of terms of a document
      * @param docID document id
      */
-
+    @Override
     public void index(List<String> terms, int docID) {
         Map<String, Double> temp = new HashMap<>();
 
@@ -57,6 +57,5 @@ public class IndexerWtNorm extends Indexer {
         }
         n_docs++;
 
-        System.out.println(temp);
     }
 }

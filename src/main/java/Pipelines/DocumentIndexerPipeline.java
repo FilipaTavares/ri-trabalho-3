@@ -2,7 +2,8 @@ package Pipelines;
 
 import IndexerEngine.corpusReaders.CorpusReader;
 import IndexerEngine.documents.Document;
-import IndexerEngine.indexer.IndexerWtNorm;
+import IndexerEngine.indexer.Indexer;
+import IndexerEngine.indexer.IndexerTermFreq;
 import IndexerEngine.tokenizers.Tokenizer;
 
 import java.io.File;
@@ -15,10 +16,10 @@ public class DocumentIndexerPipeline implements Pipeline{
     private File directory;
     private CorpusReader corpusReader;
     private Tokenizer tokenizer;
-    private IndexerWtNorm indexer;
+    private Indexer indexer;
     private String outputFileName;
 
-    public DocumentIndexerPipeline(File directory, CorpusReader corpusReader, Tokenizer tokenizer, IndexerWtNorm indexer,
+    public DocumentIndexerPipeline(File directory, CorpusReader corpusReader, Tokenizer tokenizer, Indexer indexer,
                                    String outputFileName) {
         this.directory = directory;
         this.corpusReader = corpusReader;
@@ -46,18 +47,22 @@ public class DocumentIndexerPipeline implements Pipeline{
         indexer.saveToFile(outputFileName, tokenizer.getClass().getSimpleName());
 
 
-        System.out.println("IndexerWtNorm size: " + indexer.size() + "\n");
+        System.out.println("Indexer size: " + indexer.size() + "\n");
 
-        System.out.println("List of ten first terms that appear in only one document");
-        List<String> termsInOneDoc = indexer.getFirst10TermsInOneDoc();
-        termsInOneDoc.forEach(System.out::println);
-        System.out.println();
+        String indexerName = indexer.getClass().getSimpleName();
+        if (indexerName.equals("IndexerTermFreq")) {
+            IndexerTermFreq indexerTermFreq = (IndexerTermFreq) indexer;
+            System.out.println("List of ten first terms that appear in only one document");
+            List<String> termsInOneDoc = indexerTermFreq.getFirst10TermsInOneDoc();
+            termsInOneDoc.forEach(System.out::println);
+            System.out.println();
 
-        System.out.println("List of ten first terms with higher document frequency");
+            System.out.println("List of ten first terms with higher document frequency");
 
-        List<String> termsHigherDocFreq = indexer.getFirst10TermsWithHigherDocFreq();
-        termsHigherDocFreq.forEach(System.out::println);
-        System.out.println();
+            List<String> termsHigherDocFreq = indexerTermFreq.getFirst10TermsWithHigherDocFreq();
+            termsHigherDocFreq.forEach(System.out::println);
+            System.out.println();
+        }
     }
 
     /**
@@ -88,7 +93,7 @@ public class DocumentIndexerPipeline implements Pipeline{
      * Sets the indexer to be used by the pipeline
      * @param indexer indexer
      */
-    public void setIndexer(IndexerWtNorm indexer) {
+    public void setIndexer(Indexer indexer) {
         this.indexer = indexer;
     }
 

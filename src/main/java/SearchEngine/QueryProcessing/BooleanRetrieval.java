@@ -1,7 +1,8 @@
 package SearchEngine.QueryProcessing;
 
-import IndexerEngine.indexer.IndexerWtNorm;
+import IndexerEngine.indexer.Indexer;
 import IndexerEngine.tokenizers.Tokenizer;
+import SearchEngine.Evaluation.Evaluation;
 import SearchEngine.ScoringAlgorithms.ScoringAlgorithm;
 
 import java.util.LinkedList;
@@ -10,11 +11,12 @@ import java.util.List;
 /**
  * Abstract class that contains a geral representation of the Boolean Retrieval model
  */
-public abstract class BooleanRetrieval {
+public abstract class BooleanRetrieval implements Retrieval {
     protected List<Query> results;
-    protected IndexerWtNorm indexer;
+    protected Indexer indexer;
     protected Tokenizer tokenizer;
     protected ScoringAlgorithm scoringAlgorithm;
+    protected Evaluation evaluation;
 
     public BooleanRetrieval() {
         this.results = new LinkedList<>();
@@ -26,6 +28,7 @@ public abstract class BooleanRetrieval {
      * @param query_id id of the query
      * @param query content of the query
      */
+    @Override
     public abstract void retrieve(int query_id, String query);
 
     /**
@@ -33,6 +36,7 @@ public abstract class BooleanRetrieval {
      * 
      * @param filename name of the ouput file
      */
+    @Override
     public abstract void saveToFile(String filename);
 
     /**
@@ -40,7 +44,7 @@ public abstract class BooleanRetrieval {
      * 
      * @param indexer a new IndexerWtNorm object
      */
-    public void setIndexer(IndexerWtNorm indexer) {
+    public void setIndexer(Indexer indexer) {
         this.indexer = indexer;
     }
 
@@ -60,5 +64,9 @@ public abstract class BooleanRetrieval {
      */
     public void setScoringAlgorithm(ScoringAlgorithm scoringAlgorithm) {
         this.scoringAlgorithm = scoringAlgorithm;
+    }
+    
+    public void setEvaluation(Evaluation evaluation) {
+        this.evaluation = evaluation;
     }
 }
