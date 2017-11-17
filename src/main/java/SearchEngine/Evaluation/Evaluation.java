@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Evaluation {
@@ -45,17 +44,17 @@ public class Evaluation {
 
     }
     
-    public void calculatePrecision(int query, Set<Integer> documentsRetrieved) {
-        List<Integer> documentsRelevant = queriesMeasure.get(query-1).getDocumentsRelevant();
+    public void calculatePrecision(int query, List<Integer> documentsRetrieved) {
+        List<Integer> relevantDocs = queriesMeasure.get(query - 1).getDocumentsRelevant();
         double tp = 0.0;
-        for (int docId: documentsRelevant) {
+        for (int docId: relevantDocs) {
             if (documentsRetrieved.contains(docId))
                 tp++;
         }
-        queriesMeasure.get(query-1).calculatePrecision(tp,documentsRetrieved.size());
+        queriesMeasure.get(query - 1).calculatePrecision(tp, documentsRetrieved.size());
     }
     
-    public void calculateRecall(int query, Set<Integer> documentsRetrieved) {
+    public void calculateRecall(int query, List<Integer> documentsRetrieved) {
         List<Integer> documentsRelevant = queriesMeasure.get(query-1).getDocumentsRelevant();
         double tp = 0;
         for (int docId: documentsRelevant) {
@@ -69,33 +68,39 @@ public class Evaluation {
        queriesMeasure.get(query-1).calculateFMeasure();
     }
     
-    public void calculateAveragePrecision(int query, Set<Integer> documentsRetrieved) {
-        List<Integer> documentsRelevant = queriesMeasure.get(query-1).getDocumentsRelevant();
-        double precisions = 0.0;
+    public void calculateAveragePrecision(int query, List<Integer> documentsRetrieved) {
+
+        List<Integer> documentsRelevant = queriesMeasure.get(query - 1).getDocumentsRelevant();
+        double precisionsSum = 0.0;
         double countTotal = 1;
         double tp = 0;
         for (int docId: documentsRetrieved) {
             if (documentsRelevant.contains(docId)) {
                 tp++;
-                precisions += tp/countTotal;
+                precisionsSum += tp/countTotal;
             }
             if (tp == documentsRelevant.size())
                 break;
             countTotal++;
         }
-        queriesMeasure.get(query-1).calculateAveragePrecision(precisions,tp);
+        queriesMeasure.get(query - 1).calculateAveragePrecision(precisionsSum, tp);
     }
-    
-    public double calculateMAPtoTen() {
-        if (queriesMeasure.size()>10){
-            double averagePrecisionSum = 0.0;
-            for (QueryMeasure queryMeasure: queriesMeasure.subList(0, 10))
-                averagePrecisionSum += queryMeasure.getAveragePrecision();
-            return averagePrecisionSum/10;
+
+    public void calculateAveragePrecisionAtRank10(int query, List<Integer> documentsRetrieved) {
+        List<Integer> documentsRelevant = queriesMeasure.get(query - 1).getDocumentsRelevant();
+        double precisionsSum = 0.0;
+        double countTotal = 1;
+        double tp = 0;
+        for (int docId: documentsRetrieved.subList(0, 10)) {
+            if (documentsRelevant.contains(docId)) {
+                tp++;
+                precisionsSum += tp/countTotal;
+            }
+            if (tp == documentsRelevant.size())
+                break;
+            countTotal++;
         }
-        else {
-            return calculateMAP();
-        }
+        queriesMeasure.get(query - 1).calculateAveragePrecisionAtRank10(precisionsSum, tp);
     }
 
     public double calculateMAP() {
@@ -103,16 +108,24 @@ public class Evaluation {
         for (QueryMeasure queryMeasure: queriesMeasure) {
             averagePrecisionSum += queryMeasure.getAveragePrecision();
         }
-        return averagePrecisionSum/queriesMeasure.size();
+        return averagePrecisionSum / queriesMeasure.size();
+    }
+
+    public double calculateMAPatRank10() {
+        double averagePrecisionSum = 0.0;
+        for (QueryMeasure queryMeasure: queriesMeasure) {
+            averagePrecisionSum += queryMeasure.getAveragePrecisionAtRank10();
+        }
+        return averagePrecisionSum / queriesMeasure.size();
     }
     
-    public void calculateReciprocalRank(int query, Set<Integer> documentsRetrieved) {
+    public void calculateReciprocalRank(int query, List<Integer> documentsRetrieved) {
         List<Integer> documentsRelevant = queriesMeasure.get(query-1).getDocumentsRelevant();
         double rr = 0.0;
         double countTotal = 1;
         for (int docId: documentsRetrieved) {
             if (documentsRelevant.contains(docId)) {
-                rr = 1/countTotal;
+                rr = 1 / countTotal;
                 break;
             }
             countTotal++;
@@ -124,41 +137,37 @@ public class Evaluation {
         double reciprocalRankSum = 0.0;
         for (QueryMeasure queryMeasure: queriesMeasure) {
             if (queryMeasure.getReciprocalRank() != 0.0)
-               reciprocalRankSum += 1.0/queryMeasure.getReciprocalRank();
+               reciprocalRankSum += queryMeasure.getReciprocalRank();
         }
-        return (double) reciprocalRankSum/queriesMeasure.size();
+        return reciprocalRankSum / queriesMeasure.size();
     }
     
     public void addQueryLatency(int queryId, long queryLatency) {
-        queriesMeasure.get(queryId-1).addQueryLatency(queryLatency);
+        queriesMeasure.get(queryId - 1).addQueryLatency(queryLatency);
     }
     
-    public int calculateQueryThroughput() {
-        long queryLatencySum = 0L;
-        int nQuery = 0;
-        for (QueryMeasure queryMeasure: queriesMeasure) {
-            queryLatencySum += queryMeasure.getQueryLatency();
-            nQuery++;
-            if (queryLatencySum > 1000)
-                break;
-        }
-        return nQuery;
+    public double calculateQueryThroughput() {
+        long queryLatencySum = queriesMeasure.stream().mapToLong(QueryMeasure::getQueryLatency).sum();
+        double totalTimeSeconds = (queryLatencySum / 1000.0);
+
+        return (queriesMeasure.size() / totalTimeSeconds);
     }
     
     public long calculateMedianQueryLatency() {
         List<Long> queryLatency = queriesMeasure.stream().map(QueryMeasure::getQueryLatency).sorted().collect(Collectors.toList());
-        if (queryLatency.size()%2 == 0) {
-            return (queryLatency.get(queryLatency.size()/2)+queryLatency.get((queryLatency.size()/2)+1))/2;
+        if (queryLatency.size() %2  == 0) {
+            long l = queryLatency.get((queryLatency.size() / 2) - 1) + queryLatency.get(queryLatency.size() / 2);
+            return (long) (l / 2.0);
         }
         else {
-            return queryLatency.get((int) Math.ceil(queryLatency.size() / 2.0));
+            return queryLatency.get((int) Math.floor(queryLatency.size() / 2.0));
         }
     }
     
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%s | %s | %s  | %s | %s\n", "Query Id", "Query Throughput", "Precision", "Recall","F-measure"));
+        sb.append(String.format("%s | %s | %s  | %s | %s\n", "Query Id", "Query Latency", "Precision", "Recall","F-measure"));
         sb.append("-------------------------------------------------------------\n");
         queriesMeasure.forEach(queryMeasure -> sb.append(queryMeasure.toString()));
         return sb.toString();

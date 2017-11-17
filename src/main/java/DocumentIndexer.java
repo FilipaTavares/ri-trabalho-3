@@ -1,7 +1,9 @@
 import IndexerEngine.corpusReaders.CorpusReader;
 import IndexerEngine.corpusReaders.CranfieldReader;
 import IndexerEngine.indexer.Indexer;
+import IndexerEngine.indexer.IndexerTermFreq;
 import IndexerEngine.indexer.IndexerWtNorm;
+import IndexerEngine.tokenizers.ComplexTokenizer;
 import IndexerEngine.tokenizers.Tokenizer;
 import Pipelines.DocumentIndexerPipeline;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -20,39 +22,40 @@ public class DocumentIndexer {
         ArgumentParser parser = ArgumentParsers.newFor("DocumentIndexer").build()
                 .defaultHelp(true).description("A simple indexer");
 
+        parser.addArgument("<indexer>").metavar("<indexer>").choices("freq",
+                "weighted").setDefault("weighted").help("The indexer type to construct given the " +
+                "following choices:\nfreq - term frequency indexer.\nweighted - " +
+                "weighted tf-idf indexer (lnc)");
+
         parser.addArgument("<directoryForFiles>").type(Arguments.fileType().verifyIsDirectory())
                 .help("Corpus directory");
 
-        // se so é necessario o complex tokenizer pode se eliminar isto
-        parser.addArgument("<tokenizerClassName>").metavar("<tokenizerClassName>").choices("ComplexTokenizer")
-                .setDefault("ComplexTokenizer").help("The tokenizer to be used given the following choices:\n" +
-                "ComplexTokenizer - splits the text on a sequence of one or more non alphanumeric characters and" +
-                "that have adjacent digits and non-digits." +
-                "Uses a stopword list and an english stemmer");
+        parser.addArgument("<stopwordsFile>").type(Arguments.fileType().verifyIsFile())
+                .help("stopwords file to use in the complex tokenizer");
 
         parser.addArgument("<outputFile>").help("Output file to save results");
 
         Namespace ns = parser.parseArgsOrFail(args);
 
         CorpusReader corpusReader = new CranfieldReader();
-        Indexer indexer = new IndexerWtNorm();
+
+        String indexerType = ns.getString("<indexer>");
         File directory = new File(ns.getString("<directoryForFiles>"));
+        String stopwordsFilename = ns.getString("<stopwordsFile>");
+        Indexer indexer = null;
 
-        String tokenizerClassName = ns.getString("<tokenizerClassName>");
-        Tokenizer tokenizer = null;
-        Class tokenizerClass;
 
-        try {
-            tokenizerClass = Class.forName(Tokenizer.class.getPackage().getName() + "." + tokenizerClassName);
-            tokenizer = (Tokenizer) tokenizerClass.newInstance();
+        switch (indexerType){
+            case "freq":
+                indexer = new IndexerTermFreq();
+                break;
 
-        } catch (ClassNotFoundException e) {
-            System.err.println("The tokenizer " + tokenizerClassName + " doesn't exist.");
-            System.exit(1);
-        } catch (IllegalAccessException | InstantiationException e) {
-            System.err.println("Tokenizer instantiation failed " + tokenizerClassName + e);
-            System.exit(1);
+            case "weighted":
+                indexer = new IndexerWtNorm();
+                break;
         }
+
+        Tokenizer tokenizer = new ComplexTokenizer(stopwordsFilename);
 
         DocumentIndexerPipeline indexerPipeline = new DocumentIndexerPipeline(directory, corpusReader, tokenizer,
                 indexer, ns.getString("<outputFile>"));

@@ -11,6 +11,7 @@ public class QueryMeasure {
     private double recall;
     private double fmeasure;
     private double averagePrecision;
+    private double averagePrecisionAtRank10;
     private double reciprocalRank;
     private long queryLatency;
     
@@ -43,14 +44,20 @@ public class QueryMeasure {
         if (recall == 0.0 && precision == 0.0)
             fmeasure = 0.0;
         else
-            fmeasure = (2*recall*precision)/(recall+precision);
+            fmeasure = (2 * recall * precision) / (recall + precision);
     }
 
     public void calculateAveragePrecision(double precisions, double tp) {
-        if (tp!=0)
-            averagePrecision = precisions/tp;
+        if (tp != 0)
+            averagePrecision = precisions / tp;
         else
             averagePrecision = 0.0;
+    }
+    public void calculateAveragePrecisionAtRank10(double precisions, double tp) {
+        if (tp != 0)
+            averagePrecisionAtRank10 = precisions / tp;
+        else
+            averagePrecisionAtRank10 = 0.0;
     }
 
     public void calculateReciprocalRank(double reciprocalRank) {
@@ -71,6 +78,10 @@ public class QueryMeasure {
 
     public double getAveragePrecision() {
         return averagePrecision;
+    }
+
+    public double getAveragePrecisionAtRank10() {
+        return averagePrecisionAtRank10;
     }
 
     public double getReciprocalRank() {
@@ -98,8 +109,8 @@ public class QueryMeasure {
     
     @Override
     public String toString() {
-        return String.format("%4d %-3s | %10.2f %-5s | %8.4f %-1s | %.4f | %7.4f\n", 
-                queryId, "", (float) queryLatency, "", precision, "", recall, fmeasure);
+        return String.format("%4d | %10.2f | %8.4f | %.4f | %7.4f\n",
+                queryId, (float) queryLatency, precision, recall, fmeasure);
     }
     
 }

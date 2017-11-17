@@ -14,6 +14,23 @@ import java.io.IOException;
  */
 
 public class CranfieldReader implements CorpusReader {
+    private SAXParser saxParser;
+    private SaxParserHandler handler;
+
+    public CranfieldReader() {
+        createSaxParser();
+    }
+
+    private void createSaxParser() {
+        try {
+            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+            this.saxParser = saxParserFactory.newSAXParser();
+            this.handler = new SaxParserHandler();
+        } catch (ParserConfigurationException | SAXException e) {
+            System.err.println("Unable to create document parser");
+            System.exit(1);
+        }
+    }
 
     /**
      * Reads a file and returns the contents in a document object
@@ -21,19 +38,17 @@ public class CranfieldReader implements CorpusReader {
      * @param filename name of the file to be read/parsed
      * @return a document object generated from the file or null if occurs an error while parsing
      */
+
     @Override
     public Document read(String filename) {
         try {
-            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-            SAXParser saxParser = saxParserFactory.newSAXParser();
-            SaxParserHandler handler = new SaxParserHandler();
             saxParser.parse(filename, handler);
-
             return handler.getDoc();
 
-        } catch (ParserConfigurationException | SAXException | IOException e) {
+        } catch (SAXException | IOException e) {
             System.err.println("Unable to parse document: " + filename);
         }
+
         return null;
     }
 }

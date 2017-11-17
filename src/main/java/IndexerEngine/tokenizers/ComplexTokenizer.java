@@ -16,15 +16,18 @@ import java.util.Scanner;
 
 public class ComplexTokenizer implements Tokenizer {
 
-    private static final String STOPFILE = "stop.txt";      // file that hold all the stopwords/terms to be removed
+    private String stopfile;      // file that hold all the stopwords/terms to be removed
     private List<String> stopWords;
+    private englishStemmer stemmer;
 
     /**
      * Creates a new instance of the complex tokenizer
      */
 
-    public ComplexTokenizer() {
-        stopWords = new ArrayList<>();
+    public ComplexTokenizer(String stopfile) {
+        this.stemmer = new englishStemmer();
+        this.stopfile = stopfile;
+        this.stopWords = new ArrayList<>();
         collectAllStopWords();
     }
 
@@ -51,8 +54,6 @@ public class ComplexTokenizer implements Tokenizer {
                     }
                 });
 
-        englishStemmer stemmer = new englishStemmer();
-
         for (int i = 0; i < tokens.size(); i++) {
             stemmer.setCurrent(tokens.get(i));
             stemmer.stem();
@@ -67,12 +68,20 @@ public class ComplexTokenizer implements Tokenizer {
      * Method that collects all stopwords from a file to a list
      */
     private void collectAllStopWords() {
-        try (Scanner scanner = new Scanner(new FileInputStream(new File(STOPFILE)), "UTF-8")) {
+        try (Scanner scanner = new Scanner(new FileInputStream(new File(stopfile)), "UTF-8")) {
             while (scanner.hasNextLine()) {
                 stopWords.add(scanner.nextLine().toLowerCase());
             }
         } catch (IOException e) {
-            System.err.println("Error parsing the file " + STOPFILE);
+            System.err.println("Error parsing the file " + stopfile);
         }
+    }
+
+    public String getStopfile() {
+        return stopfile;
+    }
+
+    public void setStopfile(String stopfile) {
+        this.stopfile = stopfile;
     }
 }

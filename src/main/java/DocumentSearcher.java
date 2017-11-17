@@ -2,15 +2,10 @@ import IndexerEngine.indexer.Indexer;
 import IndexerEngine.tokenizers.Tokenizer;
 import SearchEngine.IndexReader.IndexReader;
 import SearchEngine.IndexReader.IndexWtNormReader;
-import SearchEngine.QueryProcessing.BooleanRetrieval;
-import SearchEngine.QueryProcessing.DisjunctiveBooleanRetrieval;
 import SearchEngine.QueryProcessing.QueryProcessor;
 import SearchEngine.QueryProcessing.RankedRetrieval;
 import SearchEngine.QueryProcessing.Retrieval;
 import SearchEngine.ScoringAlgorithms.CosineScore;
-import SearchEngine.ScoringAlgorithms.FrequencyOfQueryWords;
-import SearchEngine.ScoringAlgorithms.NumberOfQueryWords;
-import SearchEngine.ScoringAlgorithms.ScoringAlgorithm;
 import SearchEngine.Evaluation.Evaluation;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
@@ -93,8 +88,7 @@ public class DocumentSearcher {
 
         booleanRetrieval.setScoringAlgorithm(scoringAlgorithm);*/
         Evaluation evaluation = new Evaluation("cranfield.query.relevance.txt");
-        CosineScore score = new CosineScore();
-        Retrieval retrieval = new RankedRetrieval(indexer, tokenizer, evaluation, score);
+        Retrieval retrieval = new RankedRetrieval(indexer, tokenizer, evaluation);
 
         QueryProcessor processor = new QueryProcessor();
         processor.processQueries(queries_file, retrieval, output_file);

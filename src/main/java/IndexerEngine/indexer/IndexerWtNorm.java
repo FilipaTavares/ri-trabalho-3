@@ -29,19 +29,14 @@ public class IndexerWtNorm extends Indexer {
         double sum_square_wt = 0.0;
 
         for (Map.Entry<String, Double> pair : temp.entrySet()) {
-            //Arrendondar valor??
             double wt = 1 + Math.log10(pair.getValue());
             temp.put(pair.getKey(), wt);
             sum_square_wt += Math.pow(wt, 2);
         }
 
-        /* ou usar??
-        for (String key : map.keys()) {
-          map.put(key, ..(key));
+        for (Map.Entry<String, Double> pair : temp.entrySet()) {
+            pair.setValue(pair.getValue() / Math.sqrt(sum_square_wt));
         }
-         */
-        double finalSum_square_wt = sum_square_wt;
-        temp.replaceAll((term, wt) -> wt / Math.sqrt(finalSum_square_wt));
 
         for (Map.Entry<String, Double> pair : temp.entrySet()) {
             if (!invertedIndex.containsKey(pair.getKey())) {
@@ -56,6 +51,5 @@ public class IndexerWtNorm extends Indexer {
             }
         }
         n_docs++;
-
     }
 }
