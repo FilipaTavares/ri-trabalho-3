@@ -19,16 +19,28 @@ import javax.swing.plaf.synth.SynthOptionPaneUI;
 
 public class teste {
     public static void main(String[] args) {
-        System.out.println("COSINE SCORE");
         Tokenizer tokenizer = new ComplexTokenizer("stop.txt");
+
+        System.out.println("COSINE SCORE");
 
         IndexReader indexReader = new IndexWtNormReader();
         Indexer indexer2 = indexReader.readIndex("indexWT");
-        Evaluation evaluation = new Evaluation("cranfield.query.relevance.txt", 0);
+
+        Evaluation evaluation = new Evaluation("cranfield.query.relevance.txt");
+
         Retrieval rank = new RankedRetrieval(indexer2, tokenizer, evaluation);
         QueryProcessor processor = new QueryProcessor();
+
         processor.processQueries("cranfield.queries.txt"
                 , rank, "resultsCosineScore2.txt");
+
+        System.out.println("------------------------------------------------------------------------------------");
+
+
+
+        rank.evaluate(2, 4);
+
+        /*
 
         System.out.println("----------------------------------------------------------");
 
@@ -46,9 +58,13 @@ public class teste {
 
         System.out.println("NUMBER SCORE");
         scoringAlgorithm = new NumberOfQueryWords();
+
         evaluation = new Evaluation("cranfield.query.relevance.txt",0);
         rank = new DisjunctiveBooleanRetrieval(indexer2, tokenizer, evaluation, scoringAlgorithm);
+
         processor.processQueries("cranfield.queries.txt"
                 , rank, "resultsScore.txt");
+                */
+
     }
 }

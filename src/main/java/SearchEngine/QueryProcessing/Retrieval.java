@@ -20,6 +20,7 @@ public abstract class Retrieval {
     protected Indexer indexer;
     protected Tokenizer tokenizer;
     protected Evaluation evaluation;
+    private int n_ratings;
 
 
     public Retrieval(Indexer indexer, Tokenizer tokenizer, Evaluation evaluation) {
@@ -38,6 +39,51 @@ public abstract class Retrieval {
      */
 
     public abstract void saveToFile(String filename);
+
+    public void evaluate(double threshold, int n_ratings) {
+        this.n_ratings = n_ratings;
+        evaluation.setN_ratings(n_ratings);
+
+        for (Query query: results ) {
+            List<Integer> documentsRetrieved = query.getDoc_scores().entrySet().stream()
+                    .sorted((o1, o2) -> o1.getValue().equals(o2.getValue())
+                            ? o1.getKey().compareTo(o2.getKey()) : o2.getValue().compareTo(o1.getValue()))
+                    .filter(entry -> entry.getValue() >= threshold)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+
+            evaluation.calculateQueryMeasures(query.getQuery_id(), documentsRetrieved);
+        }
+        evaluation.calculateSystemMeasures();
+        evaluation.printResults();
+    }
+
+    public void evaluate(int base, int n_ratings) {
+        evaluation.setN_ratings(n_ratings);
+        int exp = 2;
+
+        for (Query query: results ) {
+            Collection<Double> values = query.getDoc_scores().values();
+            double max = Collections.max(values);
+            double min = Collections.min(values);
+            System.out.println("MAX " + max);
+            System.out.println("MIN " + min);
+            System.out.println("MAX / 2**2 " + max / Math.pow(base, exp));
+
+            List<Integer> documentsRetrieved = query.getDoc_scores().entrySet().stream()
+                    .sorted((o1, o2) -> o1.getValue().equals(o2.getValue())
+                            ? o1.getKey().compareTo(o2.getKey()) : o2.getValue().compareTo(o1.getValue()))
+                    .filter(entry -> entry.getValue() >= max / Math.pow(base, exp))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+
+            evaluation.calculateQueryMeasures(query.getQuery_id(), documentsRetrieved);
+        }
+        evaluation.calculateSystemMeasures();
+        evaluation.printResults();
+    }
+
+
 
     public void calculateMeasures(int queryId) {
 
@@ -90,4 +136,6 @@ public abstract class Retrieval {
 
         return temp;
     }
+
+
 }

@@ -32,20 +32,27 @@ public class QueryMeasure {
         this.queryLatency = queryLatency;
     }
     
-    public List<Integer> getDocumentsRelevant() {
-        return documentsRelevant.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
+    public List<Integer> getDocumentsRelevant(int n_ratings) {
+        return documentsRelevant.entrySet().stream().filter(entry -> entry.getValue() <= n_ratings).map(Map.Entry::getKey).collect(Collectors.toList());
     }
     
-    public Map<Integer, Integer> getDocumentsRelevantWithRelevance() {
-        return documentsRelevant;
+    public Map<Integer, Integer> getDocumentsRelevantWithRelevance(int n_ratings) {
+        return documentsRelevant.entrySet().stream().filter(entry -> entry.getValue() <= n_ratings)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
     
     public void calculatePrecision(double tp, double numDocRetrieved) {
-        precision = tp/numDocRetrieved;
+        if (numDocRetrieved == 0.0)
+            precision = 0.0;
+        else
+            precision = tp / numDocRetrieved;
     }
 
-    public void calculateRecall(double tp) {
-        recall = tp/documentsRelevant.size();
+    public void calculateRecall(double tp, double relevantDocs) {
+        if (relevantDocs == 0.0)
+            recall = 0.0;
+        else
+            recall = tp / relevantDocs;
     }
     
     public void calculateFMeasure() {
@@ -112,5 +119,16 @@ public class QueryMeasure {
         return String.format(Locale.ROOT, "%-9d| %-13.2f| %-10.4f | %.4f | %-10.4f| %.4f\n",
                 queryId, (float) queryLatency, precision, recall, fmeasure, discountedCumulativeGain);
     }
-    
+
+    public double getPrecision() {
+        return precision;
+    }
+
+    public double getRecall() {
+        return recall;
+    }
+
+    public double getFmeasure() {
+        return fmeasure;
+    }
 }

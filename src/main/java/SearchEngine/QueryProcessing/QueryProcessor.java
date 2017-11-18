@@ -25,16 +25,19 @@ public class QueryProcessor {
             String line;
             while ((line = br.readLine()) != null) {
                 retrieval.retrieve(query_id, line);
-                retrieval.calculateMeasures(query_id ++);
+                query_id++;
+                //retrieval.calculateMeasures(query_id ++);
             }
 
             br.close();
             retrieval.saveToFile(outputFilename);
-            retrieval.printAllEvaluations();
+            //retrieval.printAllEvaluations();
 
         } catch (IOException e) {
             System.err.println("Error reading queries file " + queriesFilename);
             System.exit(1);
         }
+
+
     }
 }
