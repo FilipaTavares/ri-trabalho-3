@@ -1,12 +1,14 @@
 
 package SearchEngine.Evaluation;
 
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class QueryMeasure {
     private int queryId;
-    private List<Integer> documentsRelevant;
+    private Map<Integer, Integer> documentsRelevant;
     private double precision;
     private double recall;
     private double fmeasure;
@@ -14,14 +16,15 @@ public class QueryMeasure {
     private double averagePrecisionAtRank10;
     private double reciprocalRank;
     private long queryLatency;
+    private double discountedCumulativeGain;
     
     public QueryMeasure(int queryId) {
         this.queryId = queryId;
-        this.documentsRelevant = new LinkedList<>();
+        this.documentsRelevant = new HashMap<>();
     }
     
-    public void addDocumentRelevant(int docId) {
-        documentsRelevant.add(docId);
+    public void addDocumentRelevant(int docId, int relevance) {
+        documentsRelevant.put(docId,relevance);
     }
     
     public void addQueryLatency(long queryLatency) {
@@ -29,6 +32,10 @@ public class QueryMeasure {
     }
     
     public List<Integer> getDocumentsRelevant() {
+        return documentsRelevant.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
+    }
+    
+    public Map<Integer, Integer> getDocumentsRelevantWithRelevance() {
         return documentsRelevant;
     }
     
@@ -63,17 +70,9 @@ public class QueryMeasure {
     public void calculateReciprocalRank(double reciprocalRank) {
         this.reciprocalRank = reciprocalRank;
     }
-   
-    public double getPrecision() {
-        return precision;
-    }
-
-    public double getRecall() {
-        return recall;
-    }
-
-    public double getFmeasure() {
-        return fmeasure;
+    
+     public void calculateDCG(double discountedCumulativeGain) {
+        this.discountedCumulativeGain = discountedCumulativeGain;
     }
 
     public double getAveragePrecision() {
@@ -109,8 +108,8 @@ public class QueryMeasure {
     
     @Override
     public String toString() {
-        return String.format("%4d | %10.2f | %8.4f | %.4f | %7.4f\n",
-                queryId, (float) queryLatency, precision, recall, fmeasure);
+        return String.format("%4d | %10.2f | %8.4f | %.4f | %7.4f | %.4f\n",
+                queryId, (float) queryLatency, precision, recall, fmeasure, discountedCumulativeGain);
     }
     
 }

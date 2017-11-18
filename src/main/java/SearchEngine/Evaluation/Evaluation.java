@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Evaluation {
@@ -21,18 +22,19 @@ public class Evaluation {
             String line;
 
             while ((line = reader.readLine()) != null) {
-                String[] s = line.split(" ");
+                String[] s = line.split(" +");
                 int queryId = Integer.parseInt(s[0]);
                 int docId = Integer.parseInt(s[1]);
+                int relevance = 5 - Integer.parseInt(s[2]);
                 
                 int index = queriesMeasure.indexOf(new QueryMeasure(queryId));
                 if (index != -1) {
                     QueryMeasure queryMeasure = queriesMeasure.get(index);
-                    queryMeasure.addDocumentRelevant(docId);
+                    queryMeasure.addDocumentRelevant(docId, relevance);
                 }
                 else {
                     QueryMeasure queryMeasure = new QueryMeasure(queryId);
-                    queryMeasure.addDocumentRelevant(docId);
+                    queryMeasure.addDocumentRelevant(docId, relevance);
                     queriesMeasure.add(queryMeasure);
                 }
             }
@@ -164,11 +166,22 @@ public class Evaluation {
         }
     }
     
+    public void calculateDCG(int queryId, List<Integer> documentsRetrieved) {
+        Map<Integer, Integer> documentsRelevance = queriesMeasure.get(queryId - 1).getDocumentsRelevantWithRelevance();
+        double dcg = documentsRelevance.containsKey(documentsRetrieved.get(0)) 
+                ? documentsRelevance.get(documentsRetrieved.get(0)) : 0.0;
+        for (int i = 1; i < documentsRetrieved.size(); i++) {
+            if (documentsRelevance.containsKey(documentsRetrieved.get(i)))
+                dcg += (double) documentsRelevance.get(documentsRetrieved.get(i))/(Math.log(i+1)/Math.log(2));
+        }
+        queriesMeasure.get(queryId - 1).calculateDCG(dcg);
+    }
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%s | %s | %s  | %s | %s\n", "Query Id", "Query Latency", "Precision", "Recall","F-measure"));
-        sb.append("-------------------------------------------------------------\n");
+        sb.append(String.format("%s | %s | %s  | %s | %s | %s\n", "Query Id", "Query Latency", "Precision", "Recall","F-measure", "DCG"));
+        sb.append("----------------------------------------------------------------\n");
         queriesMeasure.forEach(queryMeasure -> sb.append(queryMeasure.toString()));
         return sb.toString();
     }

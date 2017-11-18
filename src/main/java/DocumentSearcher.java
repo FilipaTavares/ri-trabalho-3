@@ -7,6 +7,14 @@ import SearchEngine.QueryProcessing.RankedRetrieval;
 import SearchEngine.QueryProcessing.Retrieval;
 import SearchEngine.ScoringAlgorithms.CosineScore;
 import SearchEngine.Evaluation.Evaluation;
+import SearchEngine.IndexReader.IndexTermFreqReader;
+import SearchEngine.QueryProcessing.DisjunctiveBooleanRetrieval;
+import SearchEngine.ScoringAlgorithms.FrequencyOfQueryWords;
+import SearchEngine.ScoringAlgorithms.NumberOfQueryWords;
+import SearchEngine.ScoringAlgorithms.ScoringAlgorithm;
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -34,16 +42,49 @@ public class DocumentSearcher {
                 .help("Index file");
         parser.addArgument("<queriesfile>").type(Arguments.fileType().verifyIsFile())
                 .help("Queries file");
+        parser.addArgument("<stopwordsFile>").type(Arguments.fileType().verifyIsFile())
+                .help("stopwords file to use in the complex tokenizer");
         parser.addArgument("<scoring_algorithm>").metavar("<scoring_algorithm>").choices("qwNumber",
-                "qwFrequency").setDefault("qwNumber").help("The scoring algorithm to be used given the " +
+                "qwFrequency","cosineScore").setDefault("qwNumber").help("The scoring algorithm to be used given the " +
                 "following choices:\nqwNumber - score based on number of query words in the document.\nqwFrequency - " +
-                "score based on frequency of query words in the document");
+                "score based on frequency of query words in the document\ncosineScore- compute the cosine similarity score "+
+                "for the query vector and each document vector");
         parser.addArgument("<outputfile>").help("Output file to save results");
+        parser.addArgument("<queriesRelevanceFile>").type(Arguments.fileType().verifyIsFile())
+                .help("File that contains the relevant documents for each query");
 
         Namespace ns = parser.parseArgsOrFail(args);
 
         String index_file = ns.getString("<indexfile>");
+        String stopwordsFilename = ns.getString("<stopwordsFile>");
+        String queries_file = ns.getString("<queriesfile>");
+        String scoring_algorithm = ns.getString("<scoring_algorithm>");
+        String output_file = ns.getString("<outputfile>");
+        String querieRelevanceFile = ns.getString("<queriesRelevanceFile>");
+        
+        ScoringAlgorithm scoringAlgorithm = null;
         IndexReader indexReader = new IndexWtNormReader();
+        
+        switch(scoring_algorithm){
+            case "qwNumber":
+                indexReader = new IndexTermFreqReader();
+                scoringAlgorithm = new NumberOfQueryWords();
+                break;
+
+            case "qwFrequency":
+                indexReader = new IndexTermFreqReader();
+                scoringAlgorithm = new FrequencyOfQueryWords();
+                break;
+            
+            case "cosineScore":
+                break;
+
+            default:
+                System.err.println("Scoring algorithm not recognized");
+                System.exit(1);
+                break;
+        }
+        
         Indexer indexer = indexReader.readIndex(index_file);
 
         String tokenizerClassName = indexer.getTokenizerName();
@@ -52,43 +93,22 @@ public class DocumentSearcher {
 
         try {
             tokenizerClass = Class.forName(Tokenizer.class.getPackage().getName() + "." + tokenizerClassName);
-            tokenizer = (Tokenizer) tokenizerClass.newInstance();
+            tokenizer = (Tokenizer) tokenizerClass.getConstructor(String.class).newInstance(stopwordsFilename);
 
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
             System.err.println("The tokenizer " + tokenizerClassName + " doesn't exist.");
             System.exit(1);
-        } catch (IllegalAccessException | InstantiationException e) {
+        } catch (IllegalAccessException | InstantiationException | SecurityException 
+                | IllegalArgumentException | InvocationTargetException e) {
             System.err.println("Tokenizer instantiation failed " + tokenizerClassName + e);
             System.exit(1);
         }
-
-        String queries_file = ns.getString("<queriesfile>");
-        //String scoring_algorithm = ns.getString("<scoring_algorithm>");
-        String output_file = ns.getString("<outputfile>");
-
-        /*BooleanRetrieval booleanRetrieval = new DisjunctiveBooleanRetrieval();
-        booleanRetrieval.setIndexer(indexer);
-        booleanRetrieval.setTokenizer(tokenizer);
-
-        ScoringAlgorithm scoringAlgorithm = null;
-        switch(scoring_algorithm){
-            case "qwNumber":
-                scoringAlgorithm = new NumberOfQueryWords();
-                break;
-
-            case "qwFrequency":
-                scoringAlgorithm = new FrequencyOfQueryWords();
-                break;
-
-            default:
-                System.err.println("Scoring algorithm not recognized");
-                System.exit(1);
-                break;
-        }
-
-        booleanRetrieval.setScoringAlgorithm(scoringAlgorithm);*/
-        Evaluation evaluation = new Evaluation("cranfield.query.relevance.txt");
+        
+        Evaluation evaluation = new Evaluation(querieRelevanceFile);
         Retrieval retrieval = new RankedRetrieval(indexer, tokenizer, evaluation);
+        if (!scoring_algorithm.equals("cosineScore"))
+            retrieval = new DisjunctiveBooleanRetrieval(indexer, tokenizer, evaluation, scoringAlgorithm);
+        
 
         QueryProcessor processor = new QueryProcessor();
         processor.processQueries(queries_file, retrieval, output_file);

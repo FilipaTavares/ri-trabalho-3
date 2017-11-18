@@ -53,6 +53,7 @@ public abstract class Retrieval {
         evaluation.calculateAveragePrecision(queryId, keys);
         evaluation.calculateAveragePrecisionAtRank10(queryId, keys);
         evaluation.calculateReciprocalRank(queryId, keys);
+        evaluation.calculateDCG(queryId, keys);
     }
 
     public void printAllEvaluations() {
