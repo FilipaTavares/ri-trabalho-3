@@ -11,6 +11,15 @@ public class example {
         d = Math.round(d * scale) / scale;
         System.out.println(d);
 
+        Map<Integer, Integer> mapa = new HashMap<>();
+        mapa.put(212, 5);
+        mapa.put(1, 7);
+        mapa.put(4, 3);
+        mapa.put(10, 1);
+
+
+        System.out.println(mapa.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
+
         List<Long> queryLatency = new ArrayList<>();
         queryLatency.add((long) 2);
         queryLatency.add((long) 2);

@@ -64,7 +64,7 @@ public class DisjunctiveBooleanRetrieval extends Retrieval {
                 int id = query.getQuery_id();
                 query.getDoc_scores().entrySet().stream().sorted((o1, o2) -> o1.getValue().equals(o2.getValue())
                         ? o1.getKey().compareTo(o2.getKey()) : o2.getValue().compareTo(o1.getValue())).
-                        forEach(entry -> out.printf("%d\t%d\t%.0f\n", id, entry.getKey(), entry.getValue()));
+                        forEach(entry -> out.printf("%d\t%d\t%d\n", id, entry.getKey(), entry.getValue().intValue()));
             }
         } catch (IOException e) {
             System.err.println("Error writing results to file");

@@ -3,6 +3,7 @@ package SearchEngine.Evaluation;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -108,7 +109,7 @@ public class QueryMeasure {
     
     @Override
     public String toString() {
-        return String.format("%4d | %10.2f | %8.4f | %.4f | %7.4f | %.4f\n",
+        return String.format(Locale.ROOT, "%-9d| %-13.2f| %-10.4f | %.4f | %-10.4f| %.4f\n",
                 queryId, (float) queryLatency, precision, recall, fmeasure, discountedCumulativeGain);
     }
     

@@ -11,9 +11,24 @@ import java.util.stream.Collectors;
 
 public class Evaluation {
     private List<QueryMeasure> queriesMeasure;
+    private double true_positives;
+    private double retrieved_docs;
+    private double relevant_docs;
+    private double threshold;
+
+    private double map;
+    private double map10;
+    private double mrr;
+    private long mql;
+    private double query_throughput;
+
+    private double precision;
+    private double recall;
+    private double fmeasure;
     
-    public Evaluation(String filename) {
+    public Evaluation(String filename, double threshold) {
         this.queriesMeasure = new LinkedList<>();
+        this.threshold = threshold;
         readFile(filename);
     }
 
@@ -45,7 +60,29 @@ public class Evaluation {
         }
 
     }
-    
+
+    public void calculateSystemPrecision() {
+        System.out.println(true_positives);
+        System.out.println(retrieved_docs);
+        this.precision =  true_positives / retrieved_docs;
+
+    }
+
+    public void calculateSystemRecall() {
+        System.out.println(relevant_docs);
+        this.recall = true_positives / relevant_docs;
+
+    }
+
+    public void calculateSystemFmeasure() {
+        double precision = true_positives / retrieved_docs;
+        double recall = true_positives / relevant_docs;
+        if (recall == 0.0 && precision == 0.0)
+            this.fmeasure = 0.0;
+        else
+            this.fmeasure = (2 * recall * precision) / (recall + precision);
+    }
+
     public void calculatePrecision(int query, List<Integer> documentsRetrieved) {
         List<Integer> relevantDocs = queriesMeasure.get(query - 1).getDocumentsRelevant();
         double tp = 0.0;
@@ -53,21 +90,25 @@ public class Evaluation {
             if (documentsRetrieved.contains(docId))
                 tp++;
         }
+
+        this.true_positives += tp;
+        this.retrieved_docs += documentsRetrieved.size();
+        this.relevant_docs += relevantDocs.size();
         queriesMeasure.get(query - 1).calculatePrecision(tp, documentsRetrieved.size());
     }
-    
+
     public void calculateRecall(int query, List<Integer> documentsRetrieved) {
-        List<Integer> documentsRelevant = queriesMeasure.get(query-1).getDocumentsRelevant();
+        List<Integer> relevantDocs = queriesMeasure.get(query-1).getDocumentsRelevant();
         double tp = 0;
-        for (int docId: documentsRelevant) {
+        for (int docId: relevantDocs) {
             if (documentsRetrieved.contains(docId))
                 tp++;
         }
-        queriesMeasure.get(query-1).calculateRecall(tp);
+        queriesMeasure.get(query - 1).calculateRecall(tp);
     }
-    
+
     public void calculateFmeasure(int query) {
-       queriesMeasure.get(query-1).calculateFMeasure();
+        queriesMeasure.get(query-1).calculateFMeasure();
     }
     
     public void calculateAveragePrecision(int query, List<Integer> documentsRetrieved) {
@@ -93,6 +134,9 @@ public class Evaluation {
         double precisionsSum = 0.0;
         double countTotal = 1;
         double tp = 0;
+
+        //QUANDO COM THRESHOLD VER SIZE PODE DAR MENOS DE 10
+
         for (int docId: documentsRetrieved.subList(0, 10)) {
             if (documentsRelevant.contains(docId)) {
                 tp++;
@@ -105,20 +149,20 @@ public class Evaluation {
         queriesMeasure.get(query - 1).calculateAveragePrecisionAtRank10(precisionsSum, tp);
     }
 
-    public double calculateMAP() {
+    public void calculateMAP() {
         double averagePrecisionSum = 0.0;
         for (QueryMeasure queryMeasure: queriesMeasure) {
             averagePrecisionSum += queryMeasure.getAveragePrecision();
         }
-        return averagePrecisionSum / queriesMeasure.size();
+        this.map = averagePrecisionSum / queriesMeasure.size();
     }
 
-    public double calculateMAPatRank10() {
+    public void calculateMAPatRank10() {
         double averagePrecisionSum = 0.0;
         for (QueryMeasure queryMeasure: queriesMeasure) {
             averagePrecisionSum += queryMeasure.getAveragePrecisionAtRank10();
         }
-        return averagePrecisionSum / queriesMeasure.size();
+        this.map10 = averagePrecisionSum / queriesMeasure.size();
     }
     
     public void calculateReciprocalRank(int query, List<Integer> documentsRetrieved) {
@@ -135,34 +179,34 @@ public class Evaluation {
         queriesMeasure.get(query-1).calculateReciprocalRank(rr);
     }
     
-    public double calculateMRR() {
+    public void calculateMRR() {
         double reciprocalRankSum = 0.0;
         for (QueryMeasure queryMeasure: queriesMeasure) {
             if (queryMeasure.getReciprocalRank() != 0.0)
                reciprocalRankSum += queryMeasure.getReciprocalRank();
         }
-        return reciprocalRankSum / queriesMeasure.size();
+        this.mrr = reciprocalRankSum / queriesMeasure.size();
     }
     
     public void addQueryLatency(int queryId, long queryLatency) {
         queriesMeasure.get(queryId - 1).addQueryLatency(queryLatency);
     }
     
-    public double calculateQueryThroughput() {
+    public void calculateQueryThroughput() {
         long queryLatencySum = queriesMeasure.stream().mapToLong(QueryMeasure::getQueryLatency).sum();
         double totalTimeSeconds = (queryLatencySum / 1000.0);
 
-        return (queriesMeasure.size() / totalTimeSeconds);
+        this.query_throughput =  (queriesMeasure.size() / totalTimeSeconds);
     }
     
-    public long calculateMedianQueryLatency() {
+    public void calculateMedianQueryLatency() {
         List<Long> queryLatency = queriesMeasure.stream().map(QueryMeasure::getQueryLatency).sorted().collect(Collectors.toList());
         if (queryLatency.size() %2  == 0) {
             long l = queryLatency.get((queryLatency.size() / 2) - 1) + queryLatency.get(queryLatency.size() / 2);
-            return (long) (l / 2.0);
+            this.mql = (long) (l / 2.0);
         }
         else {
-            return queryLatency.get((int) Math.floor(queryLatency.size() / 2.0));
+            this.mql = queryLatency.get((int) Math.floor(queryLatency.size() / 2.0));
         }
     }
     
@@ -180,10 +224,44 @@ public class Evaluation {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%s | %s | %s  | %s | %s | %s\n", "Query Id", "Query Latency", "Precision", "Recall","F-measure", "DCG"));
-        sb.append("----------------------------------------------------------------\n");
+        sb.append(String.format("%s | %s | %s  | %s | %s| %s\n", "Query Id", "Latency (ms)", "Precision", "Recall","F-measure", "DCG"));
+        sb.append("-------------------------------------------------------------------\n");
         queriesMeasure.forEach(queryMeasure -> sb.append(queryMeasure.toString()));
         return sb.toString();
     }
 
+    public void calculateQueryMeasures(int queryId, List<Integer> keys) {
+        calculatePrecision(queryId, keys);
+        calculateRecall(queryId, keys);
+        calculateFmeasure(queryId);
+        calculateAveragePrecision(queryId, keys);
+        calculateAveragePrecisionAtRank10(queryId, keys);
+        calculateReciprocalRank(queryId, keys);
+        calculateDCG(queryId, keys);
+    }
+
+    public void calculateSystemMeasures() {
+        calculateMAP();
+        calculateMAPatRank10();
+        calculateMRR();
+        calculateMedianQueryLatency();
+        calculateQueryThroughput();
+        calculateSystemPrecision();
+        calculateSystemRecall();
+        calculateSystemFmeasure();
+    }
+
+    public void printResults(){
+        System.out.println(this.toString());
+
+        System.out.println("Precision: " + precision);
+        System.out.println("Recall: " + recall);
+        System.out.println("Fmeasure: " + fmeasure);
+        System.out.printf("Mean Average Precision: %.5f\n", map);
+        System.out.printf("Mean Average Precision at Rank 10: %.5f\n", map10);
+        System.out.printf("Mean Reciprocal Rank: %.5f\n", mrr);
+        System.out.println("Query Throughput per second: " + query_throughput);
+        System.out.println("Median Query Latency: "+ mql + "\n");
+
+    }
 }

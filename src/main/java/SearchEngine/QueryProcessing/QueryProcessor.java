@@ -25,7 +25,7 @@ public class QueryProcessor {
             String line;
             while ((line = br.readLine()) != null) {
                 retrieval.retrieve(query_id, line);
-                retrieval.calculateMeasures(query_id++);
+                retrieval.calculateMeasures(query_id ++);
             }
 
             br.close();

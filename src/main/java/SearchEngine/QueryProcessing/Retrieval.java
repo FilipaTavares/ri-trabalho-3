@@ -47,28 +47,12 @@ public abstract class Retrieval {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
-        evaluation.calculatePrecision(queryId, keys);
-        evaluation.calculateRecall(queryId, keys);
-        evaluation.calculateFmeasure(queryId);
-        evaluation.calculateAveragePrecision(queryId, keys);
-        evaluation.calculateAveragePrecisionAtRank10(queryId, keys);
-        evaluation.calculateReciprocalRank(queryId, keys);
-        evaluation.calculateDCG(queryId, keys);
+        evaluation.calculateQueryMeasures(queryId, keys);
     }
 
     public void printAllEvaluations() {
-        double map = evaluation.calculateMAP();
-        double map10 = evaluation.calculateMAPatRank10();
-        double mrr = evaluation.calculateMRR();
-        long mql = evaluation.calculateMedianQueryLatency();
-        double query_throughput = evaluation.calculateQueryThroughput();
-
-        System.out.println(evaluation.toString());
-        System.out.printf("Mean Average Precision: %.5f\n", map);
-        System.out.printf("Mean Average Precision at Rank 10: %.5f\n", map10);
-        System.out.printf("Mean Reciprocal Rank: %.5f\n", mrr);
-        System.out.println("Query Throughput per second: " + query_throughput);
-        System.out.println("Median Query Latency: "+ mql + "\n");
+        evaluation.calculateSystemMeasures();
+        evaluation.printResults();
     }
 
     /**
@@ -92,5 +76,18 @@ public abstract class Retrieval {
 
     public void setEvaluation(Evaluation evaluation) {
         this.evaluation = evaluation;
+    }
+
+    public List<Double> getMax_MinValue() {
+        List<Double> list = new ArrayList<>();
+        for (Query query : results) {
+            list.add(Collections.max(query.getDoc_scores().values()));
+        }
+
+        List<Double> temp = new ArrayList<>();
+        temp.add(Collections.max(list));
+        temp.add(Collections.min(list));
+
+        return temp;
     }
 }

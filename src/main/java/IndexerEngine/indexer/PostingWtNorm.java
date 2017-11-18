@@ -1,5 +1,7 @@
 package IndexerEngine.indexer;
 
+import java.util.Locale;
+
 /**
  * This class represents regarding a given term a tuple (docID, wt_norm) which states that the term is present
  * in the document with the id docID and it appears termFreq times
@@ -33,7 +35,7 @@ public class PostingWtNorm extends Posting {
 
     @Override
     public String toString() {
-        return docID + ":" + wt_norm;
+        return docID + ":" + String.format(Locale.ROOT,"%.5f", wt_norm);
     }
 
 }

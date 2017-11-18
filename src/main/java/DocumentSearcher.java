@@ -104,7 +104,7 @@ public class DocumentSearcher {
             System.exit(1);
         }
         
-        Evaluation evaluation = new Evaluation(querieRelevanceFile);
+        Evaluation evaluation = new Evaluation(querieRelevanceFile,0);
         Retrieval retrieval = new RankedRetrieval(indexer, tokenizer, evaluation);
         if (!scoring_algorithm.equals("cosineScore"))
             retrieval = new DisjunctiveBooleanRetrieval(indexer, tokenizer, evaluation, scoringAlgorithm);
