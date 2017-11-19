@@ -30,6 +30,7 @@ public abstract class Retrieval {
         this.evaluation = evaluation;
     }
 
+
     public abstract void retrieve(int queryId, String queryText);
 
     /**
@@ -55,20 +56,21 @@ public abstract class Retrieval {
             evaluation.calculateQueryMeasures(query.getQuery_id(), documentsRetrieved);
         }
         evaluation.calculateSystemMeasures();
+        System.out.println("Precision values to plot: " + evaluation.averageRecallPrecision());
         evaluation.printResults();
+        evaluation.reset();
     }
 
-    public void evaluate(int base, int n_ratings) {
+    public void evaluate(int base, int exp, int n_ratings) {
         evaluation.setN_ratings(n_ratings);
-        int exp = 2;
 
         for (Query query: results ) {
             Collection<Double> values = query.getDoc_scores().values();
             double max = Collections.max(values);
             double min = Collections.min(values);
-            System.out.println("MAX " + max);
-            System.out.println("MIN " + min);
-            System.out.println("MAX / 2**2 " + max / Math.pow(base, exp));
+            //System.out.println("MAX " + max);
+            //System.out.println("MIN " + min);
+            //System.out.println("MAX / 2**2 " + max / Math.pow(base, exp));
 
             List<Integer> documentsRetrieved = query.getDoc_scores().entrySet().stream()
                     .sorted((o1, o2) -> o1.getValue().equals(o2.getValue())
@@ -80,7 +82,9 @@ public abstract class Retrieval {
             evaluation.calculateQueryMeasures(query.getQuery_id(), documentsRetrieved);
         }
         evaluation.calculateSystemMeasures();
+        System.out.println("Precision values to plot: " + evaluation.averageRecallPrecision());
         evaluation.printResults();
+        evaluation.reset();
     }
 
 

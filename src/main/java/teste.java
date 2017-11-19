@@ -32,13 +32,26 @@ public class teste {
         QueryProcessor processor = new QueryProcessor();
 
         processor.processQueries("cranfield.queries.txt"
-                , rank, "resultsCosineScore2.txt");
+                , rank, "resultsCosineScore4.txt");
 
         System.out.println("------------------------------------------------------------------------------------");
 
+        rank.evaluate(0.0, 4);
 
 
-        rank.evaluate(2, 4);
+
+
+        /*
+        System.out.println("Max value * 1.0 /2**0");
+        rank.evaluate(2,0, 4);   //max  * 1
+        System.out.println("Max value * 1.0 /2**1");
+        rank.evaluate(2,1, 4);  // max * 1/3
+        System.out.println("Max value * 1.0 /2**2");
+        rank.evaluate(2,2, 4);  // max * 1/
+        System.out.println("Max value * 1.0 /2**3");
+        rank.evaluate(2,3, 4);
+        */
+
 
         /*
 

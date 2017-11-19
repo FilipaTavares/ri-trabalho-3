@@ -4,6 +4,7 @@ package SearchEngine.Evaluation;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +27,25 @@ public class Evaluation {
     private double precision;
     private double recall;
     private double fmeasure;
-    
+    List<Double> levels;
+
     public Evaluation(String filename) {
         this.queriesMeasure = new LinkedList<>();
         this.threshold = threshold;
         readFile(filename);
+
+        levels = new ArrayList<>();
+        levels.add(0.0);
+        levels.add(0.1);
+        levels.add(0.2);
+        levels.add(0.3);
+        levels.add(0.4);
+        levels.add(0.5);
+        levels.add(0.6);
+        levels.add(0.7);
+        levels.add(0.8);
+        levels.add(0.9);
+        levels.add(1.0);
     }
 
     private void readFile(String filename) {
@@ -135,18 +150,42 @@ public class Evaluation {
     public void calculateAveragePrecision(int query, List<Integer> documentsRetrieved, List<Integer> relevantDocs) {
 
         double precisionsSum = 0.0;
-        double countTotal = 1;
+        int nRelevant = relevantDocs.size();
+        double countRetr = 1;
         double tp = 0;
         for (int docId: documentsRetrieved) {
             if (relevantDocs.contains(docId)) {
                 tp++;
-                precisionsSum += tp/countTotal;
+                double recall = tp / nRelevant;
+                double precision = tp / countRetr;
+                queriesMeasure.get(query - 1).addRecallPrecisionPoint(recall, precision);
+                precisionsSum += precision;
             }
+
             if (tp == relevantDocs.size())
                 break;
-            countTotal++;
+            countRetr++;
         }
         queriesMeasure.get(query - 1).calculateAveragePrecision(precisionsSum, tp);
+        queriesMeasure.get(query - 1).interpolatePrecision(levels);
+    }
+
+    public List<Double> averageRecallPrecision() {
+        List<Double> averagePoints = new ArrayList<>();
+        for (QueryMeasure queryMeasure : queriesMeasure) {
+            List<Double> points = queryMeasure.getPoints();
+
+            if (averagePoints.isEmpty()) {
+                averagePoints.addAll(points);
+            } else {
+                for (int i = 0; i < points.size(); i++)
+                    averagePoints.set(i, averagePoints.get(i) + points.get(i));
+
+            }
+        }
+        averagePoints.replaceAll(sum -> sum / queriesMeasure.size());
+
+        return averagePoints;
     }
 
     public void calculateAveragePrecisionAtRank10(int query, List<Integer> documentsRetrieved,
@@ -283,7 +322,7 @@ public class Evaluation {
     }
 
     public void printResults(){
-        System.out.println(this.toString());
+        //System.out.println(this.toString());
 
         System.out.println("TP " + true_positives);
         System.out.println("RETRIVED DOCS " + retrieved_docs);
@@ -302,5 +341,21 @@ public class Evaluation {
 
     public void setN_ratings(int n_ratings) {
         this.n_ratings = n_ratings;
+    }
+
+    public void reset(){
+        true_positives = 0.0;
+        retrieved_docs = 0.0;
+        relevant_docs = 0.0;
+        map = 0.0;
+        map10 = 0.0;
+        mrr = 0.0;
+        mql = (long) 0.0;
+        query_throughput = 0.0;
+        precision = 0.0;
+        recall = 0.0;
+        fmeasure = 0.0;
+
+        queriesMeasure.forEach(QueryMeasure::reset);
     }
 }

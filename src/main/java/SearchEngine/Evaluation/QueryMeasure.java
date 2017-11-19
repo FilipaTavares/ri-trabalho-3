@@ -1,10 +1,7 @@
 
 package SearchEngine.Evaluation;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class QueryMeasure {
@@ -18,10 +15,18 @@ public class QueryMeasure {
     private double reciprocalRank;
     private long queryLatency;
     private double discountedCumulativeGain;
-    
+    private Map<Double, Double> recall_precision;           // tirar daqui e passar para o interploated
+    private List<Double> points;
+
     public QueryMeasure(int queryId) {
         this.queryId = queryId;
         this.documentsRelevant = new HashMap<>();
+        recall_precision = new LinkedHashMap<>();
+        points = new ArrayList<>();
+    }
+
+    public void addRecallPrecisionPoint(double recall, double precision) {
+        recall_precision.put(recall, precision);
     }
     
     public void addDocumentRelevant(int docId, int relevance) {
@@ -130,5 +135,36 @@ public class QueryMeasure {
 
     public double getFmeasure() {
         return fmeasure;
+    }
+
+    public void interpolatePrecision(List<Double> levels) {
+        Set<Double> keys = recall_precision.keySet();
+
+        for (double level: levels) {
+            double max_precision = 0.0;
+
+            for (double rl: keys) {
+                if (rl >= level && recall_precision.get(rl) > max_precision) {
+                    max_precision = recall_precision.get(rl);
+                }
+            }
+            this.points.add(max_precision);
+        }
+    }
+
+    public List<Double> getPoints() {
+        return points;
+    }
+
+    public void reset() {
+        this.precision = 0.0;
+        this.recall = 0.0;
+        this.fmeasure = 0.0;
+        this.averagePrecision = 0.0;
+        this.averagePrecisionAtRank10 = 0.0;
+        this.reciprocalRank = 0.0;
+        this.discountedCumulativeGain = 0.0;
+        this.recall_precision.clear();
+        this.points.clear();
     }
 }

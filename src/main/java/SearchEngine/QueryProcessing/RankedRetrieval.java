@@ -6,18 +6,20 @@ import IndexerEngine.indexer.PostingWtNorm;
 import IndexerEngine.tokenizers.Tokenizer;
 import SearchEngine.ScoringAlgorithms.CosineScore;
 import SearchEngine.Evaluation.Evaluation;
+
+import javax.swing.plaf.synth.SynthOptionPaneUI;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
 public class RankedRetrieval extends Retrieval {
     private CosineScore score;
-    private List<Vector> vectors;
+    private Map<Integer, Vector> vectors;
 
     public RankedRetrieval(Indexer indexer, Tokenizer tokenizer, Evaluation evaluation) {
         super(indexer, tokenizer, evaluation);
         this.score = new CosineScore();
-        this.vectors = new LinkedList<>();
+        this.vectors = new HashMap<>();
     }
 
     @Override
@@ -29,7 +31,7 @@ public class RankedRetrieval extends Retrieval {
 
         Query query = new Query(queryID);
         fillVectors(terms);
-        score.computeScores(query, temp, vectors);
+        score.computeScores(query, temp, vectors.values());
         results.add(query);
         long queryLatency = System.currentTimeMillis() - start;
 
@@ -45,22 +47,26 @@ public class RankedRetrieval extends Retrieval {
             temp.put(term, count + 1);
         }
 
+
         double sum_square_wt = 0.0;
         for (Map.Entry<String, Double> pair : temp.entrySet()) {
             if (indexer.getTermPostings(pair.getKey()) != null) {
                 int docFreq = indexer.getTermPostings(pair.getKey()).size();
-                double tfTerm = 1 + Math.log10(pair.getValue());
-                double idf = Math.log10((nDocs / docFreq));
+                double tfTerm = 1.0 + Math.log10(pair.getValue());
+                double idf = Math.log10(( (double)nDocs / docFreq));
                 double wt = tfTerm * idf;
                 temp.put(pair.getKey(), wt);
                 sum_square_wt += Math.pow(wt, 2);
-            } else {
+            }
+            else {
                 temp.put(pair.getKey(), 0.0);
             }
         }
 
-        for (Map.Entry<String, Double> pair : temp.entrySet()) {
-            pair.setValue(pair.getValue() / Math.sqrt(sum_square_wt));
+        if(sum_square_wt != 0) {
+            for (Map.Entry<String, Double> pair : temp.entrySet()) {
+                pair.setValue(pair.getValue() / Math.sqrt(sum_square_wt));
+            }
         }
 
         return temp;
@@ -72,9 +78,17 @@ public class RankedRetrieval extends Retrieval {
                 List<Posting> postingList = indexer.getTermPostings(term);
                 for (Posting posting1: postingList) {
                     PostingWtNorm posting = (PostingWtNorm) posting1;
-                    Vector vector = new Vector(posting.getDocID());
-                    vector.addTerm(term, posting.getWt_norm());
-                    vectors.add(vector);
+
+                    if (!vectors.containsKey(posting.getDocID())) {
+                        Vector vector = new Vector(posting.getDocID());
+                        vector.addTerm(term, posting.getWt_norm());
+                        vectors.put(posting.getDocID(), vector);
+                    }
+
+                    else {
+                        vectors.get(posting.getDocID()).addTerm(term, posting.getWt_norm());
+                    }
+
                 }
             }
         }

@@ -1,4 +1,5 @@
 import SearchEngine.Evaluation.QueryMeasure;
+import javafx.util.Pair;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -6,40 +7,56 @@ import java.util.stream.Collectors;
 
 public class example {
     public static void main(String[] args) {
+        int n = 5;
+        int freq = 3;
+
+        double idf = Math.log10((5 / 3));
+        System.out.println("----------" + idf);
+        double idf2 = (double) Math.log10((5.0 / 3));
+        System.out.println("----------" + idf2);
+
+
         double d = 0.06948650704907821;
         double scale = Math.pow(10, 5);
         d = Math.round(d * scale) / scale;
         System.out.println(d);
 
-        Map<Integer, Integer> mapa = new HashMap<>();
-        mapa.put(212, 5);
-        mapa.put(1, 7);
-        mapa.put(4, 3);
-        mapa.put(10, 1);
+        Map<Double, Double> mapa = new LinkedHashMap<>();
+        mapa.put(0.33, 0.5);
+        mapa.put(0.67, 0.4);
+        mapa.put(1.0, 0.43);
+
+        List<Double> levels = new ArrayList<>();
+        levels.add(0.0);
+        levels.add(0.1);
+        levels.add(0.2);
+        levels.add(0.3);
+        levels.add(0.4);
+        levels.add(0.5);
+        levels.add(0.6);
+        levels.add(0.7);
+        levels.add(0.8);
+        levels.add(0.9);
+        levels.add(1.0);
 
 
-        System.out.println(mapa.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
+        List<Double> points = new ArrayList<>();
+        Set<Double> keys = mapa.keySet();
 
-        List<Long> queryLatency = new ArrayList<>();
-        queryLatency.add((long) 2);
-        queryLatency.add((long) 2);
-        queryLatency.add((long) 3);
-        queryLatency.add((long) 7);
-        queryLatency.add((long) 8);
-        queryLatency.add((long) 8);
-        queryLatency.add((long) 9);
+        for (double level: levels) {
+            double max_precision = 0.0;
 
-        queryLatency.forEach(System.out::print);
-        System.out.println();
+            for (double rl: keys) {
+                System.out.println(rl + " " + level);
+                System.out.println(rl>=level);
+                if (rl >= level && mapa.get(rl) > max_precision) {
+                        max_precision = mapa.get(rl);
+                    }
+                }
+                points.add(max_precision);
+            }
 
-        if (queryLatency.size() % 2 == 0) {
-            long l = queryLatency.get((queryLatency.size() / 2) - 1) + queryLatency.get(queryLatency.size() / 2);
-            System.out.println(l / 2.0);
-
-        } else {
-            System.out.println(Math.floor(queryLatency.size() / 2.0));
-
-            System.out.println(queryLatency.get((int) Math.floor(queryLatency.size() / 2.0)));
-        }
+        System.out.println(points);
     }
 }
+
