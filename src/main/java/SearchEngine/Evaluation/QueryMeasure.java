@@ -73,6 +73,7 @@ public class QueryMeasure {
         else
             averagePrecision = 0.0;
     }
+
     public void calculateAveragePrecisionAtRank10(double precisions, double tp) {
         if (tp != 0)
             averagePrecisionAtRank10 = precisions / tp;

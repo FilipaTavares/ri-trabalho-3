@@ -36,20 +36,44 @@ public class teste {
 
         System.out.println("------------------------------------------------------------------------------------");
 
-        rank.evaluate(0.0, 4);
+        //rank.evaluate(0.3, 3);
 
+        System.out.println(rank.getMax_MinValue());
 
+        /*
+        rank.evaluate(0.1, 4);
+        rank.evaluate(0.2, 4);
+        rank.evaluate(0.3, 4);
+        rank.evaluate(0.4, 4);
+        rank.evaluate(0.5, 4);
+        rank.evaluate(0.6, 4);
+        */
+
+        System.out.println("Max value * 1.0 /3**1");
+        rank.evaluate(3,1, 3);        // max * 1/3
+        System.out.println("Max value * 1.0 /3**2");
+        rank.evaluate(3,2, 3);        // max * 1/
+        System.out.println("Max value * 1.0 /3**3");
+        rank.evaluate(3,3, 3);
 
 
         /*
-        System.out.println("Max value * 1.0 /2**0");
-        rank.evaluate(2,0, 4);   //max  * 1
-        System.out.println("Max value * 1.0 /2**1");
-        rank.evaluate(2,1, 4);  // max * 1/3
-        System.out.println("Max value * 1.0 /2**2");
-        rank.evaluate(2,2, 4);  // max * 1/
-        System.out.println("Max value * 1.0 /2**3");
-        rank.evaluate(2,3, 4);
+
+        System.out.println("Max value * 1.0 /3**1");
+        rank.evaluate(3,1, 4);  // max * 1/3
+        System.out.println("Max value * 1.0 /3**2");
+        rank.evaluate(3,2, 4);  // max * 1/
+        System.out.println("Max value * 1.0 /3**3");
+        rank.evaluate(3,3, 4);
+
+        System.out.println("Max value * 1.0 /3**4");
+        rank.evaluate(3,4, 4);
+
+        System.out.println("Max value * 1.0 /3**5");
+        rank.evaluate(3,5, 4);
+
+        System.out.println("Max value * 1.0 /3**6");
+        rank.evaluate(3,6, 4);
         */
 
 

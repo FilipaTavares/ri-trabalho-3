@@ -151,9 +151,10 @@ public class Evaluation {
 
         double precisionsSum = 0.0;
         int nRelevant = relevantDocs.size();
-        double countRetr = 1;
+        double countRetr = 0;
         double tp = 0;
         for (int docId: documentsRetrieved) {
+            countRetr++;
             if (relevantDocs.contains(docId)) {
                 tp++;
                 double recall = tp / nRelevant;
@@ -164,7 +165,7 @@ public class Evaluation {
 
             if (tp == relevantDocs.size())
                 break;
-            countRetr++;
+
         }
         queriesMeasure.get(query - 1).calculateAveragePrecision(precisionsSum, tp);
         queriesMeasure.get(query - 1).interpolatePrecision(levels);
@@ -191,7 +192,7 @@ public class Evaluation {
     public void calculateAveragePrecisionAtRank10(int query, List<Integer> documentsRetrieved,
                                                   List<Integer> relevantDocs) {
         double precisionsSum = 0.0;
-        double countTotal = 1;
+        double countTotal = 0;
         double tp = 0;
 
         //QUANDO COM THRESHOLD VER SIZE PODE DAR MENOS DE 10
@@ -200,13 +201,14 @@ public class Evaluation {
         }
 
         for (int docId: documentsRetrieved) {
+            countTotal++;
             if (relevantDocs.contains(docId)) {
                 tp++;
-                precisionsSum += tp/countTotal;
+                precisionsSum += tp / countTotal;
             }
             if (tp == relevantDocs.size())
                 break;
-            countTotal++;
+
         }
 
         queriesMeasure.get(query - 1).calculateAveragePrecisionAtRank10(precisionsSum, tp);
@@ -220,6 +222,8 @@ public class Evaluation {
         this.map = averagePrecisionSum / queriesMeasure.size();
     }
 
+
+
     public void calculateMAPatRank10() {
         double averagePrecisionSum = 0.0;
         for (QueryMeasure queryMeasure: queriesMeasure) {
@@ -231,13 +235,14 @@ public class Evaluation {
     public void calculateReciprocalRank(int query, List<Integer> documentsRetrieved,  List<Integer> relevantDocs) {
 
         double rr = 0.0;
-        double countTotal = 1;
+        double countTotal = 0;
         for (int docId: documentsRetrieved) {
+            countTotal++;
+
             if (relevantDocs.contains(docId)) {
                 rr = 1 / countTotal;
                 break;
             }
-            countTotal++;
         }
         queriesMeasure.get(query-1).calculateReciprocalRank(rr);
     }
