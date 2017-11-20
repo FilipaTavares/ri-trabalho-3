@@ -21,7 +21,6 @@ public class IndexerWtNorm extends Indexer {
         Map<String, Double> temp = new HashMap<>();
 
         for (String term : terms) {
-
             double count = temp.getOrDefault(term, 0.0);
             temp.put(term, count + 1);
         }

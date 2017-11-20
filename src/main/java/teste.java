@@ -36,26 +36,24 @@ public class teste {
 
         System.out.println("------------------------------------------------------------------------------------");
 
-        //rank.evaluate(0.3, 3);
 
         System.out.println(rank.getMax_MinValue());
+        /**
+        int rating = 1;
+        System.out.println("Max value * 1/2");
+        rank.evaluate(2,1, rating);
 
-        /*
-        rank.evaluate(0.1, 4);
-        rank.evaluate(0.2, 4);
-        rank.evaluate(0.3, 4);
-        rank.evaluate(0.4, 4);
-        rank.evaluate(0.5, 4);
-        rank.evaluate(0.6, 4);
-        */
+        System.out.println("Max value * 1/3");
+        rank.evaluate(3,1, rating);
 
-        System.out.println("Max value * 1.0 /3**1");
-        rank.evaluate(3,1, 3);        // max * 1/3
-        System.out.println("Max value * 1.0 /3**2");
-        rank.evaluate(3,2, 3);        // max * 1/
-        System.out.println("Max value * 1.0 /3**3");
-        rank.evaluate(3,3, 3);
+        System.out.println("Max value * 1/4");
+        rank.evaluate(4,1, rating);
 
+        System.out.println("Max value * 1/5");
+        rank.evaluate(5,1, rating);
+
+        System.out.println("Max value * 1/6");
+        rank.evaluate(6,1, rating);
 
         /*
 

@@ -4,7 +4,7 @@ package SearchEngine.Evaluation;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class QueryMeasure {
+public class QueryMetrics {
     private int queryId;
     private Map<Integer, Integer> documentsRelevant;
     private double precision;
@@ -15,10 +15,10 @@ public class QueryMeasure {
     private double reciprocalRank;
     private long queryLatency;
     private double discountedCumulativeGain;
-    private Map<Double, Double> recall_precision;           // tirar daqui e passar para o interploated
+    private Map<Double, Double> recall_precision;
     private List<Double> points;
 
-    public QueryMeasure(int queryId) {
+    public QueryMetrics(int queryId) {
         this.queryId = queryId;
         this.documentsRelevant = new HashMap<>();
         recall_precision = new LinkedHashMap<>();
@@ -81,11 +81,11 @@ public class QueryMeasure {
             averagePrecisionAtRank10 = 0.0;
     }
 
-    public void calculateReciprocalRank(double reciprocalRank) {
+    public void setReciprocalRank(double reciprocalRank) {
         this.reciprocalRank = reciprocalRank;
     }
     
-     public void calculateDCG(double discountedCumulativeGain) {
+     public void setDcg(double discountedCumulativeGain) {
         this.discountedCumulativeGain = discountedCumulativeGain;
     }
 
@@ -110,7 +110,7 @@ public class QueryMeasure {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        QueryMeasure queryRelevance = (QueryMeasure) o;
+        QueryMetrics queryRelevance = (QueryMetrics) o;
 
         return queryId == queryRelevance.queryId;
     }
@@ -120,8 +120,7 @@ public class QueryMeasure {
         return queryId;
     }
     
-    @Override
-    public String toString() {
+    public String displayQueriesMetrics() {
         return String.format(Locale.ROOT, "%-9d| %-13.2f| %-10.4f | %.4f | %-10.4f| %.4f\n",
                 queryId, (float) queryLatency, precision, recall, fmeasure, discountedCumulativeGain);
     }
@@ -151,6 +150,7 @@ public class QueryMeasure {
             }
             this.points.add(max_precision);
         }
+
     }
 
     public List<Double> getPoints() {
@@ -167,5 +167,13 @@ public class QueryMeasure {
         this.discountedCumulativeGain = 0.0;
         this.recall_precision.clear();
         this.points.clear();
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.ROOT, "%-9d| %-13f| %-9.5f | %-6.5f | %-10.5f| %-14.5f" +
+                        "| %-22.5f| %-16.5f| %.5f\n",
+                queryId , (float) queryLatency, precision, recall, fmeasure, averagePrecision, averagePrecisionAtRank10,
+                reciprocalRank, discountedCumulativeGain);
     }
 }

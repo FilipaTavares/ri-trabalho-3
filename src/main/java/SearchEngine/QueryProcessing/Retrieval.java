@@ -20,7 +20,6 @@ public abstract class Retrieval {
     protected Indexer indexer;
     protected Tokenizer tokenizer;
     protected Evaluation evaluation;
-    private int n_ratings;
 
 
     public Retrieval(Indexer indexer, Tokenizer tokenizer, Evaluation evaluation) {
@@ -41,8 +40,8 @@ public abstract class Retrieval {
 
     public abstract void saveToFile(String filename);
 
-    public void evaluate(double threshold, int n_ratings) {
-        this.n_ratings = n_ratings;
+    public void evaluateWithFixedThreshold(double threshold, int n_ratings, Boolean displayQueryMetrics) {
+        System.out.println("Evaluating with fixed threshold: " + threshold + " and number of ratings: " + n_ratings + "\n");
         evaluation.setN_ratings(n_ratings);
 
         for (Query query: results ) {
@@ -57,25 +56,25 @@ public abstract class Retrieval {
         }
         evaluation.calculateSystemMeasures();
         System.out.println("Precision values to plot: " + evaluation.averageRecallPrecision());
-        evaluation.printResults();
+        evaluation.printResults(displayQueryMetrics);
         evaluation.reset();
     }
 
-    public void evaluate(int base, int exp, int n_ratings) {
+    public void evaluateWithVariableThreshold(double threshold, int n_ratings, Boolean displayQueryMetrics) {
+        System.out.println("Evaluating with variable threshold: max_score_value * " + threshold + " and number of ratings: " + n_ratings + "\n");
+
         evaluation.setN_ratings(n_ratings);
 
         for (Query query: results ) {
             Collection<Double> values = query.getDoc_scores().values();
             double max = Collections.max(values);
             double min = Collections.min(values);
-            //System.out.println("MAX " + max);
-            //System.out.println("MIN " + min);
-            //System.out.println("MAX / 2**2 " + max / Math.pow(base, exp));
+
 
             List<Integer> documentsRetrieved = query.getDoc_scores().entrySet().stream()
                     .sorted((o1, o2) -> o1.getValue().equals(o2.getValue())
                             ? o1.getKey().compareTo(o2.getKey()) : o2.getValue().compareTo(o1.getValue()))
-                    .filter(entry -> entry.getValue() >= max / Math.pow(base, exp))
+                    .filter(entry -> entry.getValue() >= max * threshold)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
 
@@ -83,7 +82,7 @@ public abstract class Retrieval {
         }
         evaluation.calculateSystemMeasures();
         System.out.println("Precision values to plot: " + evaluation.averageRecallPrecision());
-        evaluation.printResults();
+        evaluation.printResults(displayQueryMetrics);
         evaluation.reset();
     }
 
@@ -98,11 +97,6 @@ public abstract class Retrieval {
                 .collect(Collectors.toList());
 
         evaluation.calculateQueryMeasures(queryId, keys);
-    }
-
-    public void printAllEvaluations() {
-        evaluation.calculateSystemMeasures();
-        evaluation.printResults();
     }
 
     /**
