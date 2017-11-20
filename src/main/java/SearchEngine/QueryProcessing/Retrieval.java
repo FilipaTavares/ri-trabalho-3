@@ -55,7 +55,8 @@ public abstract class Retrieval {
             evaluation.calculateQueryMeasures(query.getQuery_id(), documentsRetrieved);
         }
         evaluation.calculateSystemMeasures();
-        System.out.println("Precision values to plot: " + evaluation.averageRecallPrecision());
+        System.out.println("Precision values to plot precision-recall curve with recall levels [0,1] with a step of 0.1:\n"
+                + evaluation.averageRecallPrecision());
         evaluation.printResults(displayQueryMetrics);
         evaluation.reset();
     }
@@ -81,7 +82,8 @@ public abstract class Retrieval {
             evaluation.calculateQueryMeasures(query.getQuery_id(), documentsRetrieved);
         }
         evaluation.calculateSystemMeasures();
-        System.out.println("Precision values to plot: " + evaluation.averageRecallPrecision());
+        System.out.println("Precision values to plot precision-recall curve with recall levels [0,1] with a step of 0.1:\n"
+                + evaluation.averageRecallPrecision());
         evaluation.printResults(displayQueryMetrics);
         evaluation.reset();
     }

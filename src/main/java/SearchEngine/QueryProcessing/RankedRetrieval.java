@@ -14,85 +14,26 @@ import java.util.*;
 
 public class RankedRetrieval extends Retrieval {
     private CosineScore score;
-    private Map<Integer, Vector> vectors;
 
     public RankedRetrieval(Indexer indexer, Tokenizer tokenizer, Evaluation evaluation) {
         super(indexer, tokenizer, evaluation);
-        this.score = new CosineScore();
-        this.vectors = new HashMap<>();
+        this.score = new CosineScore(indexer);
     }
 
     @Override
     public void retrieve(int queryID, String queryText) {
         long start = System.currentTimeMillis();
-        vectors.clear();
         List<String> terms = tokenizer.tokenize(queryText);
-        Map<String, Double> temp = normalizeQuery(terms);
-
         Query query = new Query(queryID);
-        fillVectors(terms);
-        score.computeScores(query, temp, vectors.values());
+
+        score.computeScores(query, terms);
+
         results.add(query);
         long queryLatency = System.currentTimeMillis() - start;
 
         evaluation.addQueryLatency(queryID, queryLatency);
     }
 
-
-    private Map<String, Double> normalizeQuery(List<String> terms) {
-        Map<String, Double> temp = new HashMap<>();
-        int nDocs = indexer.getN_docs();
-        for (String term : terms) {
-            double count = temp.getOrDefault(term, 0.0);
-            temp.put(term, count + 1);
-        }
-
-
-        double sum_square_wt = 0.0;
-        for (Map.Entry<String, Double> pair : temp.entrySet()) {
-            if (indexer.getTermPostings(pair.getKey()) != null) {
-                int docFreq = indexer.getTermPostings(pair.getKey()).size();
-                double tfTerm = 1.0 + Math.log10(pair.getValue());
-                double idf = Math.log10(( (double)nDocs / docFreq));
-                double wt = tfTerm * idf;
-                temp.put(pair.getKey(), wt);
-                sum_square_wt += Math.pow(wt, 2);
-            }
-            else {
-                temp.put(pair.getKey(), 0.0);
-            }
-        }
-
-        if(sum_square_wt != 0) {
-            for (Map.Entry<String, Double> pair : temp.entrySet()) {
-                pair.setValue(pair.getValue() / Math.sqrt(sum_square_wt));
-            }
-        }
-
-        return temp;
-    }
-
-    private void fillVectors(List<String> terms) {
-        for (String term : terms) {
-            if (indexer.getTermPostings(term) != null) {
-                List<Posting> postingList = indexer.getTermPostings(term);
-                for (Posting posting1: postingList) {
-                    PostingWtNorm posting = (PostingWtNorm) posting1;
-
-                    if (!vectors.containsKey(posting.getDocID())) {
-                        Vector vector = new Vector(posting.getDocID());
-                        vector.addTerm(term, posting.getWt_norm());
-                        vectors.put(posting.getDocID(), vector);
-                    }
-
-                    else {
-                        vectors.get(posting.getDocID()).addTerm(term, posting.getWt_norm());
-                    }
-
-                }
-            }
-        }
-    }
 
     @Override
     public void saveToFile(String filename) {
