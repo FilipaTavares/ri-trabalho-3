@@ -23,8 +23,10 @@ public class RankedRetrieval extends Retrieval {
     @Override
     public void retrieve(int queryID, String queryText) {
         long start = System.currentTimeMillis();
+
         List<String> terms = tokenizer.tokenize(queryText);
         Query query = new Query(queryID);
+
 
         score.computeScores(query, terms);
 

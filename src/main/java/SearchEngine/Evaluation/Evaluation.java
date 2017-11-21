@@ -23,7 +23,7 @@ public class Evaluation {
     private double precision;
     private double recall;
     private double fmeasure;
-    List<Double> recall_levels;
+    private List<Double> recall_levels;
 
     public Evaluation(String filename) {
         this.queriesMetrics = new LinkedList<>();
@@ -57,11 +57,11 @@ public class Evaluation {
                 int index = queriesMetrics.indexOf(new QueryMetrics(queryId));
                 if (index != -1) {
                     QueryMetrics queryMetrics = queriesMetrics.get(index);
-                    queryMetrics.addDocumentRelevant(docId, relevance);
+                    queryMetrics.addRelevantDoc(docId, relevance);
                 }
                 else {
                     QueryMetrics queryMetrics = new QueryMetrics(queryId);
-                    queryMetrics.addDocumentRelevant(docId, relevance);
+                    queryMetrics.addRelevantDoc(docId, relevance);
                     queriesMetrics.add(queryMetrics);
                 }
             }
@@ -73,14 +73,14 @@ public class Evaluation {
 
     }
 
-    public void calculateSystemPrecision() {
+    private void calculateSystemPrecision() {
         if (retrieved_docs == 0.0)
             this.precision = 0.0;
         else
             this.precision =  true_positives / retrieved_docs;
     }
 
-    public void calculateSystemRecall() {
+    private void calculateSystemRecall() {
         if (relevant_docs == 0.0)
             this.recall = 0.0;
         else
@@ -88,14 +88,14 @@ public class Evaluation {
 
     }
 
-    public void calculateSystemFmeasure() {
+    private void calculateSystemFmeasure() {
         if (this.recall == 0.0 && this.precision == 0.0)
             this.fmeasure = 0.0;
         else
             this.fmeasure = (2 * recall * precision) / (recall + precision);
     }
 
-    public void calculatePrecision(int queryID, List<Integer> retrievedDocs, List<Integer> relevantDocs) {
+    private void calculatePrecision(int queryID, List<Integer> retrievedDocs, List<Integer> relevantDocs) {
         double tp = 0.0;
         for (int docId: relevantDocs) {
             if (retrievedDocs.contains(docId))
@@ -108,7 +108,7 @@ public class Evaluation {
         queriesMetrics.get(queryID - 1).calculatePrecision(tp, retrievedDocs.size());
     }
 
-    public void calculateRecall(int queryID, List<Integer> retrievedDocs, List<Integer> relevantDocs) {
+    private void calculateRecall(int queryID, List<Integer> retrievedDocs, List<Integer> relevantDocs) {
         double tp = 0.0;
         for (int docId: relevantDocs) {
             if (retrievedDocs.contains(docId))
@@ -117,7 +117,7 @@ public class Evaluation {
         queriesMetrics.get(queryID - 1).calculateRecall(tp, relevantDocs.size());
     }
 
-    public void calculateAveragePrecision(int query, List<Integer> documentsRetrieved, List<Integer> relevantDocs) {
+    private void calculateAveragePrecision(int query, List<Integer> documentsRetrieved, List<Integer> relevantDocs) {
 
         double precisionsSum = 0.0;
         int nRelevant = relevantDocs.size();
@@ -159,8 +159,8 @@ public class Evaluation {
         return averagePoints;
     }
 
-    public void calculateAveragePrecisionAtRank10(int query, List<Integer> documentsRetrieved,
-                                                  List<Integer> relevantDocs) {
+    private void calculateAveragePrecisionAtRank10(int query, List<Integer> documentsRetrieved,
+                                                   List<Integer> relevantDocs) {
         double precisionsSum = 0.0;
         double countTotal = 0;
         double tp = 0;
@@ -183,7 +183,7 @@ public class Evaluation {
         queriesMetrics.get(query - 1).calculateAveragePrecisionAtRank10(precisionsSum, tp);
     }
 
-    public void calculateMAP() {
+    private void calculateMAP() {
         double averagePrecisionSum = 0.0;
         for (QueryMetrics queryMetrics : queriesMetrics) {
             averagePrecisionSum += queryMetrics.getAveragePrecision();
@@ -191,7 +191,7 @@ public class Evaluation {
         this.map = averagePrecisionSum / queriesMetrics.size();
     }
 
-    public void calculateMAPatRank10() {
+    private void calculateMAPatRank10() {
         double averagePrecisionSum = 0.0;
         for (QueryMetrics queryMetrics : queriesMetrics) {
             averagePrecisionSum += queryMetrics.getAveragePrecisionAtRank10();
@@ -199,7 +199,7 @@ public class Evaluation {
         this.map10 = averagePrecisionSum / queriesMetrics.size();
     }
     
-    public void calculateReciprocalRank(int query, List<Integer> documentsRetrieved,  List<Integer> relevantDocs) {
+    private void calculateReciprocalRank(int query, List<Integer> documentsRetrieved, List<Integer> relevantDocs) {
 
         double rr = 0.0;
         double countTotal = 0;
@@ -214,7 +214,7 @@ public class Evaluation {
         queriesMetrics.get(query-1).setReciprocalRank(rr);
     }
     
-    public void calculateMRR() {
+    private void calculateMRR() {
         double reciprocalRankSum = 0.0;
         for (QueryMetrics queryMetrics : queriesMetrics) {
             if (queryMetrics.getReciprocalRank() != 0.0)
@@ -227,14 +227,14 @@ public class Evaluation {
         queriesMetrics.get(queryId - 1).addQueryLatency(queryLatency);
     }
     
-    public void calculateQueryThroughput() {
+    private void calculateQueryThroughput() {
         long queryLatencySum = queriesMetrics.stream().mapToLong(QueryMetrics::getQueryLatency).sum();
         double totalTimeSeconds = (queryLatencySum / 1000.0);
 
         this.query_throughput =  (queriesMetrics.size() / totalTimeSeconds);
     }
     
-    public void calculateMedianQueryLatency() {
+    private void calculateMedianQueryLatency() {
         List<Long> queryLatency = queriesMetrics.stream().map(QueryMetrics::getQueryLatency).sorted().collect(Collectors.toList());
         if (queryLatency.size() %2  == 0) {
             long l = queryLatency.get((queryLatency.size() / 2) - 1) + queryLatency.get(queryLatency.size() / 2);
@@ -245,9 +245,9 @@ public class Evaluation {
         }
     }
 
-    public void calculateDCG(int queryId, List<Integer> documentsRetrieved) {
+    private void calculateDCG(int queryId, List<Integer> documentsRetrieved) {
 
-        Map<Integer, Integer> documentsRelevance = queriesMetrics.get(queryId - 1).getDocumentsRelevantWithRelevance(n_ratings);
+        Map<Integer, Integer> documentsRelevance = queriesMetrics.get(queryId - 1).getRelevantDocsWithRelevance(n_ratings);
 
         if (!documentsRetrieved.isEmpty()) {
             double dcg = documentsRelevance.containsKey(documentsRetrieved.get(0))
@@ -264,7 +264,7 @@ public class Evaluation {
     
 
     public void calculateQueryMeasures(int queryID, List<Integer> retrievedDocuments) {
-        List<Integer> relevantDocuments = queriesMetrics.get(queryID - 1).getDocumentsRelevant(n_ratings);
+        List<Integer> relevantDocuments = queriesMetrics.get(queryID - 1).getRelevantDocs(n_ratings);
         calculatePrecision(queryID, retrievedDocuments, relevantDocuments);
         calculateRecall(queryID, retrievedDocuments, relevantDocuments);
         queriesMetrics.get(queryID-1).calculateFMeasure();
@@ -285,7 +285,7 @@ public class Evaluation {
         calculateSystemFmeasure();
     }
 
-    public String displayQueriesMetrics() {
+    private String displayQueriesMetrics() {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%s | %s | %s | %s  | %s | %s | %s | %s | %s\n", "Query Id", "Latency (ms)",
                 "Precision", "Recall","F-measure", "Av. precision", "Av. precision rank 10",

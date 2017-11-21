@@ -37,7 +37,6 @@ public class teste {
         System.out.println("------------------------------------------------------------------------------------");
 
 
-        System.out.println(rank.getMax_MinValue());
         /**
         int rating = 1;
         System.out.println("Max value * 1/2");

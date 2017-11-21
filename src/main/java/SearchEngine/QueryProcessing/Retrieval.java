@@ -88,19 +88,6 @@ public abstract class Retrieval {
         evaluation.reset();
     }
 
-
-
-    public void calculateMeasures(int queryId) {
-
-        List<Integer> keys = results.get(queryId - 1).getDoc_scores().entrySet().stream()
-                .sorted((o1, o2) -> o1.getValue().equals(o2.getValue())
-                ? o1.getKey().compareTo(o2.getKey()) : o2.getValue().compareTo(o1.getValue()))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-
-        evaluation.calculateQueryMeasures(queryId, keys);
-    }
-
     /**
      * Store or modify the IndexerWtNorm object
      * 
@@ -123,19 +110,5 @@ public abstract class Retrieval {
     public void setEvaluation(Evaluation evaluation) {
         this.evaluation = evaluation;
     }
-
-    public List<Double> getMax_MinValue() {
-        List<Double> list = new ArrayList<>();
-        for (Query query : results) {
-            list.add(Collections.max(query.getDoc_scores().values()));
-        }
-
-        List<Double> temp = new ArrayList<>();
-        temp.add(Collections.max(list));
-        temp.add(Collections.min(list));
-
-        return temp;
-    }
-
 
 }

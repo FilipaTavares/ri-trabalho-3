@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 public class QueryMetrics {
     private int queryId;
-    private Map<Integer, Integer> documentsRelevant;
+    private Map<Integer, Integer> relevantDocs;
     private double precision;
     private double recall;
     private double fmeasure;
@@ -20,7 +20,7 @@ public class QueryMetrics {
 
     public QueryMetrics(int queryId) {
         this.queryId = queryId;
-        this.documentsRelevant = new HashMap<>();
+        this.relevantDocs = new HashMap<>();
         recall_precision = new LinkedHashMap<>();
         points = new ArrayList<>();
     }
@@ -29,20 +29,20 @@ public class QueryMetrics {
         recall_precision.put(recall, precision);
     }
     
-    public void addDocumentRelevant(int docId, int relevance) {
-        documentsRelevant.put(docId,relevance);
+    public void addRelevantDoc(int docId, int relevance) {
+        relevantDocs.put(docId,relevance);
     }
     
     public void addQueryLatency(long queryLatency) {
         this.queryLatency = queryLatency;
     }
     
-    public List<Integer> getDocumentsRelevant(int n_ratings) {
-        return documentsRelevant.entrySet().stream().filter(entry -> entry.getValue() <= n_ratings).map(Map.Entry::getKey).collect(Collectors.toList());
+    public List<Integer> getRelevantDocs(int n_ratings) {
+        return relevantDocs.entrySet().stream().filter(entry -> entry.getValue() <= n_ratings).map(Map.Entry::getKey).collect(Collectors.toList());
     }
     
-    public Map<Integer, Integer> getDocumentsRelevantWithRelevance(int n_ratings) {
-        return documentsRelevant.entrySet().stream().filter(entry -> entry.getValue() <= n_ratings)
+    public Map<Integer, Integer> getRelevantDocsWithRelevance(int n_ratings) {
+        return relevantDocs.entrySet().stream().filter(entry -> entry.getValue() <= n_ratings)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
     
@@ -120,11 +120,6 @@ public class QueryMetrics {
         return queryId;
     }
     
-    public String displayQueriesMetrics() {
-        return String.format(Locale.ROOT, "%-9d| %-13.2f| %-10.4f | %.4f | %-10.4f| %.4f\n",
-                queryId, (float) queryLatency, precision, recall, fmeasure, discountedCumulativeGain);
-    }
-
     public double getPrecision() {
         return precision;
     }
