@@ -36,9 +36,10 @@ public class DisjunctiveBooleanRetrieval extends Retrieval {
      */
     @Override
     public void retrieve(int query_id, String query_text) {
-        long start = System.currentTimeMillis();
         List<String> terms = tokenizer.tokenize(query_text);
         List<Posting> allPostings = new LinkedList<>();
+        long startTime = System.nanoTime();
+
 
         for(String term : terms) {
             if (indexer.getTermPostings(term) != null)
@@ -48,8 +49,8 @@ public class DisjunctiveBooleanRetrieval extends Retrieval {
         Query query = new Query(query_id);
         scoringAlgorithm.computeScores(query, allPostings);
         results.add(query);
-        long queryLatency = System.currentTimeMillis() - start;
-        evaluation.addQueryLatency(query_id, queryLatency);
+        long queryLatency = System.nanoTime() - startTime;
+        evaluation.addQueryLatency(query_id, queryLatency / 1e6);
     }
 
     public void setScoringAlgorithm(ScoringAlgorithm scoringAlgorithm) {

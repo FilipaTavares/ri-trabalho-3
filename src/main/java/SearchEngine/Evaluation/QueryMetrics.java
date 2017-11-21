@@ -13,7 +13,7 @@ public class QueryMetrics {
     private double averagePrecision;
     private double averagePrecisionAtRank10;
     private double reciprocalRank;
-    private long queryLatency;
+    private double queryLatency;
     private double discountedCumulativeGain;
     private Map<Double, Double> recall_precision;
     private List<Double> points;
@@ -33,7 +33,7 @@ public class QueryMetrics {
         relevantDocs.put(docId,relevance);
     }
     
-    public void addQueryLatency(long queryLatency) {
+    public void addQueryLatency(double queryLatency) {
         this.queryLatency = queryLatency;
     }
     
@@ -101,7 +101,7 @@ public class QueryMetrics {
         return reciprocalRank;
     }
 
-    public long getQueryLatency() {
+    public double getQueryLatency() {
         return queryLatency;
     }
     

@@ -17,7 +17,7 @@ public class Evaluation {
     private double map;
     private double map10;
     private double mrr;
-    private long mql;
+    private double mql;
     private double query_throughput;
 
     private double precision;
@@ -78,6 +78,10 @@ public class Evaluation {
             this.precision = 0.0;
         else
             this.precision =  true_positives / retrieved_docs;
+
+
+
+
     }
 
     private void calculateSystemRecall() {
@@ -85,7 +89,6 @@ public class Evaluation {
             this.recall = 0.0;
         else
             this.recall = true_positives / relevant_docs;
-
     }
 
     private void calculateSystemFmeasure() {
@@ -223,22 +226,22 @@ public class Evaluation {
         this.mrr = reciprocalRankSum / queriesMetrics.size();
     }
     
-    public void addQueryLatency(int queryId, long queryLatency) {
+    public void addQueryLatency(int queryId, double queryLatency) {
         queriesMetrics.get(queryId - 1).addQueryLatency(queryLatency);
     }
     
     private void calculateQueryThroughput() {
-        long queryLatencySum = queriesMetrics.stream().mapToLong(QueryMetrics::getQueryLatency).sum();
+        double queryLatencySum = queriesMetrics.stream().mapToDouble(QueryMetrics::getQueryLatency).sum();
         double totalTimeSeconds = (queryLatencySum / 1000.0);
 
         this.query_throughput =  (queriesMetrics.size() / totalTimeSeconds);
     }
     
     private void calculateMedianQueryLatency() {
-        List<Long> queryLatency = queriesMetrics.stream().map(QueryMetrics::getQueryLatency).sorted().collect(Collectors.toList());
+        List<Double> queryLatency = queriesMetrics.stream().map(QueryMetrics::getQueryLatency).sorted().collect(Collectors.toList());
         if (queryLatency.size() %2  == 0) {
-            long l = queryLatency.get((queryLatency.size() / 2) - 1) + queryLatency.get(queryLatency.size() / 2);
-            this.mql = (long) (l / 2.0);
+            double l = queryLatency.get((queryLatency.size() / 2) - 1) + queryLatency.get(queryLatency.size() / 2);
+            this.mql = l / 2.0;
         }
         else {
             this.mql = queryLatency.get((int) Math.floor(queryLatency.size() / 2.0));
