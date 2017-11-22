@@ -466,7 +466,7 @@ public class Evaluation {
         map = 0.0;
         map10 = 0.0;
         mrr = 0.0;
-        mql = (long) 0.0;
+        mql = 0.0;
         query_throughput = 0.0;
         precision = 0.0;
         recall = 0.0;
