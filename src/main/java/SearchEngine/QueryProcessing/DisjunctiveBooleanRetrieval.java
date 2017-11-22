@@ -37,9 +37,8 @@ public class DisjunctiveBooleanRetrieval extends Retrieval {
     public void retrieve(int query_id, String query_text) {
         List<String> terms = tokenizer.tokenize(query_text);
         List<Posting> allPostings = new LinkedList<>();
+
         long startTime = System.nanoTime();
-
-
         for(String term : terms) {
             if (indexer.getTermPostings(term) != null)
                 allPostings.addAll(indexer.getTermPostings(term));
@@ -49,6 +48,7 @@ public class DisjunctiveBooleanRetrieval extends Retrieval {
         scoringAlgorithm.computeScores(query, allPostings);
         results.add(query);
         long queryLatency = System.nanoTime() - startTime;
+
         evaluation.addQueryLatency(query_id, queryLatency / 1e6);
     }
 

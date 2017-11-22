@@ -184,6 +184,8 @@ public class DocumentSearcher {
         QueryProcessor processor = new QueryProcessor();
         processor.processQueries(queries_file, retrieval, output_file);
 
+        long elapsedTime = System.currentTimeMillis() - start;
+
         if (default_evaluation) {
             retrieval.evaluateWithFixedThreshold(0.0, 4, displayQueryMetrics);
         }
@@ -205,7 +207,6 @@ public class DocumentSearcher {
             }
         }
 
-        long elapsedTime = System.currentTimeMillis() - start;
         System.out.println("Execution time in ms: " + elapsedTime);
     }
 

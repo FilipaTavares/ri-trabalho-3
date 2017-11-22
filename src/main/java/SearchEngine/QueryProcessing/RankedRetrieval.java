@@ -31,12 +31,10 @@ public class RankedRetrieval extends Retrieval {
     @Override
     public void retrieve(int queryID, String queryText) {
         List<String> terms = tokenizer.tokenize(queryText);
+
         long startTime = System.nanoTime();
         Query query = new Query(queryID);
-
-
         score.computeScores(query, terms);
-
         results.add(query);
         long queryLatency = System.nanoTime() - startTime;
 
