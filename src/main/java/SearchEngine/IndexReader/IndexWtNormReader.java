@@ -16,8 +16,10 @@ import java.util.List;
 public class IndexWtNormReader implements IndexReader{
 
     /**
-     * Method that reads the index file parsing the first line to save the tokenizer name used and the remaining lines
+     * Method that reads the index file parsing the first line to save the tokenizer name used and
+     * the number of documents. The remaining lines
      * to construct the index structure which is returned.
+     * 
      * @param filename index filename
      * @return a IndexerWtNorm object that contains the index structure
      */

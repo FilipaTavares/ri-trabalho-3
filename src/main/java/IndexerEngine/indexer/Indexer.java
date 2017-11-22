@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Abstract class that represents in a general way an indexer
+ * 
+ */
 public abstract class Indexer {
     protected Map<String, List<Posting>> invertedIndex;
     protected int n_docs;
@@ -19,6 +23,12 @@ public abstract class Indexer {
         this.tokenizerName = "";
     }
 
+    /**
+     * Abstract method that should index a document
+     * 
+     * @param terms list of terms of a document
+     * @param docID document id
+     */
     public abstract void index(List<String> terms, int docID);
 
     /**
@@ -94,18 +104,38 @@ public abstract class Indexer {
 
     }
 
+    /**
+     * Returns the number of documents processed
+     * 
+     * @return number of documents processed
+     */
     public int getN_docs() {
         return n_docs;
     }
 
+    /**
+     * Store or modify the number of documents processed
+     * 
+     * @param n_docs the number of documents processed
+     */
     public void setN_docs(int n_docs) {
         this.n_docs = n_docs;
     }
 
+    /**
+     * Returns the tokenizer class name
+     * 
+     * @return tokenizer class name
+     */
     public String getTokenizerName() {
         return tokenizerName;
     }
 
+    /**
+     * Store or modify the tokenizer class name
+     * 
+     * @param tokenizerName tokenizer class name
+     */
     public void setTokenizerName(String tokenizerName) {
         this.tokenizerName = tokenizerName;
     }

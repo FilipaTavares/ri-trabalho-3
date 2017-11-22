@@ -2,11 +2,8 @@ package SearchEngine.ScoringAlgorithms;
 
 import IndexerEngine.indexer.Posting;
 import SearchEngine.QueryProcessing.Query;
-import SearchEngine.QueryProcessing.Vector;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Interface that defines the methods to calculate the scores of documents relevant to a given query

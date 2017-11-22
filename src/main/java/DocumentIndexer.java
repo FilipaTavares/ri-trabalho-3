@@ -14,7 +14,17 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import java.io.File;
 import java.io.IOException;
 
-
+/**
+ * <h2>Document IndexerEngine.indexer</h2>
+ * Receives as arguments:
+ * <p>the choice of the type of the indexer</p>
+ * <p>The directory containing the IndexerEngine.documents</p>
+ * <p>The filename that contains the stopwords</p>
+ * <p>The output file name to store de index results</p>
+ *
+ * @author Ana Filipa Tavares 76629
+ * @author Andreia Machado 76501
+ */
 public class DocumentIndexer {
     public static void main(String[] args) throws IOException {
         long start = System.currentTimeMillis();

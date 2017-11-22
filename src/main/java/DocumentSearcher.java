@@ -22,8 +22,23 @@ import net.sourceforge.argparse4j.inf.Namespace;
 
 /**
  * <h2>Document Searcher</h2>
- * Receives as arguments:
+ * The required arguments are:
  * <p>The index filename</p>
+ * <p>The queries filename</p>
+ * <p>The stopwords filename</p>
+ * <p>The choice of the scoring algorithm</p>
+ * <p>The output filename to store the score of the documents of each query</p>
+ * <p>The filename that contains the relevant documents and its relevance level</p>
+ * 
+ * The program are also optional arguments, that are:
+ * <p>a sequence of fixed threshold where, for each query, the retrieved documents have
+ * a score greater or equal than the fixed threshold defined by the user</p>
+ * <p>a sequence of variable threshold where, for each query, the retrieved documents have
+ * a score greater or equal than the multiplication between the maximum score of the document and
+ * the variable threshold defined by the user</p>
+ * <p>a sequence of relevance level, where the relevant documents have the relevance level
+ * less or equal that the relevance level defined by the user</p>
+ * <p>boolean value that indicates if the user want to see the metrics value for each query</p>
  *
  * @author Ana Filipa Tavares 76629
  * @author Andreia Machado 76501
@@ -81,8 +96,6 @@ public class DocumentSearcher {
 
         Namespace ns = parser.parseArgsOrFail(args);
 
-        //indexWT cranfield.queries.txt stop.txt cosineScore resultsCosineScore cranfield.query.relevance.txt
-
         String index_file = ns.getString("<indexfile>");
         String stopwordsFilename = ns.getString("<stopwordsFile>");
         String queries_file = ns.getString("<queriesfile>");
@@ -116,9 +129,6 @@ public class DocumentSearcher {
         else {
             default_evaluation = false;
         }
-
-
-        System.out.println(ns);
 
         ScoringAlgorithm scoringAlgorithm = null;
         IndexReader indexReader = new IndexWtNormReader();

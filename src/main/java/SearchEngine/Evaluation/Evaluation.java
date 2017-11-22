@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Class that evaluate a search system
+ * 
+ */
 public class Evaluation {
     private List<QueryMetrics> queriesMetrics;
     private double true_positives;
@@ -29,7 +33,7 @@ public class Evaluation {
         this.queriesMetrics = new LinkedList<>();
         readFile(filename);
 
-        // fixo porque de forma iterativa valores de double não são exatos ex: 0.3 -> 0.30000000004
+        // fixo porque de forma iterativa valores de double nao sao exatos ex: 0.3 -> 0.30000000004
         recall_levels = new ArrayList<>();
         recall_levels.add(0.0);
         recall_levels.add(0.1);
@@ -44,6 +48,13 @@ public class Evaluation {
         recall_levels.add(1.0);
     }
 
+    /**
+     * Method that read the file that contains the relevant documents for each query.
+     * The document id and the relevance level of that document is saved.
+     * 
+     * @param filename filename of the file that contais the 
+     * relevant documents for each query
+     */
     private void readFile(String filename) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))){
             String line;
@@ -73,17 +84,29 @@ public class Evaluation {
 
     }
 
+    /**
+     * Method that calculate the precision of the system.
+     * The system precision is calculate by the divison between the true positives
+     * and the number of retrieved documents.
+     * The value of the true positives is the sum of true positives of the system and
+     * the number of retrieved documents is the sum of retrieved documents of the system.
+     * 
+     */
     private void calculateSystemPrecision() {
         if (retrieved_docs == 0.0)
             this.precision = 0.0;
         else
             this.precision =  true_positives / retrieved_docs;
-
-
-
-
     }
 
+    /**
+     * Method that calculate the recall of the system.
+     * The system precision is calculate by the divison between the true positives
+     * and the number of relevant documents.
+     * The value of the true positives is the sum of true positives of the system and
+     * the number of relevant documents is the sum of relevant documents of the system.
+     * 
+     */
     private void calculateSystemRecall() {
         if (relevant_docs == 0.0)
             this.recall = 0.0;
@@ -91,6 +114,10 @@ public class Evaluation {
             this.recall = true_positives / relevant_docs;
     }
 
+    /**
+     * Method that calculate the F-measure of the system
+     * 
+     */
     private void calculateSystemFmeasure() {
         if (this.recall == 0.0 && this.precision == 0.0)
             this.fmeasure = 0.0;
@@ -98,6 +125,15 @@ public class Evaluation {
             this.fmeasure = (2 * recall * precision) / (recall + precision);
     }
 
+    /**
+     * Method that calculate the precision of each query.
+     * In this method, is incremented the value of the true positives, the number
+     * of the retrieved documents and the number of the relevant documents.
+     * 
+     * @param queryID query id
+     * @param retrievedDocs list of the retrieved documents
+     * @param relevantDocs list of the relevant documents
+     */
     private void calculatePrecision(int queryID, List<Integer> retrievedDocs, List<Integer> relevantDocs) {
         double tp = 0.0;
         for (int docId: relevantDocs) {
@@ -111,6 +147,13 @@ public class Evaluation {
         queriesMetrics.get(queryID - 1).calculatePrecision(tp, retrievedDocs.size());
     }
 
+    /**
+     * Method that calculate the recall of each query
+     * 
+     * @param queryID query id
+     * @param retrievedDocs list of the retrieved documents
+     * @param relevantDocs list of the relevant documents
+     */
     private void calculateRecall(int queryID, List<Integer> retrievedDocs, List<Integer> relevantDocs) {
         double tp = 0.0;
         for (int docId: relevantDocs) {
@@ -120,6 +163,15 @@ public class Evaluation {
         queriesMetrics.get(queryID - 1).calculateRecall(tp, relevantDocs.size());
     }
 
+    /**
+     * Method that calculate the average precision of each query.
+     * In this method, for each rank position that represents a relevant document and retrieved,
+     * is calculate the recall, for later be possible make the interpolation of the differents points.
+     * 
+     * @param query query id
+     * @param documentsRetrieved list of the retrieved documents
+     * @param relevantDocs list of the relevant documents
+     */
     private void calculateAveragePrecision(int query, List<Integer> documentsRetrieved, List<Integer> relevantDocs) {
 
         double precisionsSum = 0.0;
@@ -144,6 +196,12 @@ public class Evaluation {
         queriesMetrics.get(query - 1).interpolatePrecision(recall_levels);
     }
 
+    /**
+     * Method that calculate the mean of the interpolated points for all the queries
+     * for pre-defined recall levels 
+     * 
+     * @return list of the mean of the interpolated points
+     */
     public List<Double> averageRecallPrecision() {
         List<Double> averagePoints = new ArrayList<>();
         for (QueryMetrics queryMetrics : queriesMetrics) {
@@ -162,6 +220,14 @@ public class Evaluation {
         return averagePoints;
     }
 
+    /**
+     * Method that calculate the average precision for the first 10 retrieved documents
+     * of each query
+     * 
+     * @param query query id
+     * @param documentsRetrieved list of the retrieved documents
+     * @param relevantDocs list of the relevant documents
+     */
     private void calculateAveragePrecisionAtRank10(int query, List<Integer> documentsRetrieved,
                                                    List<Integer> relevantDocs) {
         double precisionsSum = 0.0;
@@ -186,6 +252,10 @@ public class Evaluation {
         queriesMetrics.get(query - 1).calculateAveragePrecisionAtRank10(precisionsSum, tp);
     }
 
+    /**
+     * Method that calculate the mean average precision of the system
+     * 
+     */
     private void calculateMAP() {
         double averagePrecisionSum = 0.0;
         for (QueryMetrics queryMetrics : queriesMetrics) {
@@ -194,6 +264,11 @@ public class Evaluation {
         this.map = averagePrecisionSum / queriesMetrics.size();
     }
 
+    /**
+     * Method that calculate the mean average precison of the first 10 retrieved
+     * documents of the system
+     * 
+     */
     private void calculateMAPatRank10() {
         double averagePrecisionSum = 0.0;
         for (QueryMetrics queryMetrics : queriesMetrics) {
@@ -202,6 +277,13 @@ public class Evaluation {
         this.map10 = averagePrecisionSum / queriesMetrics.size();
     }
     
+    /**
+     * Method that calculates the reciprocal rank of each query
+     * 
+     * @param query query id
+     * @param documentsRetrieved list of the retrieved documents
+     * @param relevantDocs list of the relevant documents
+     */
     private void calculateReciprocalRank(int query, List<Integer> documentsRetrieved, List<Integer> relevantDocs) {
 
         double rr = 0.0;
@@ -217,6 +299,10 @@ public class Evaluation {
         queriesMetrics.get(query-1).setReciprocalRank(rr);
     }
     
+    /**
+     * Method that calculate the mean reciprocal rank of the system
+     * 
+     */
     private void calculateMRR() {
         double reciprocalRankSum = 0.0;
         for (QueryMetrics queryMetrics : queriesMetrics) {
@@ -226,10 +312,20 @@ public class Evaluation {
         this.mrr = reciprocalRankSum / queriesMetrics.size();
     }
     
+    /**
+     * Method that call a method in the class QueryMetrics to store the query latency
+     * 
+     * @param queryId query id
+     * @param queryLatency processing time of the query
+     */
     public void addQueryLatency(int queryId, double queryLatency) {
         queriesMetrics.get(queryId - 1).addQueryLatency(queryLatency);
     }
     
+    /**
+     * Method that calculate the query throughput of the system
+     * 
+     */
     private void calculateQueryThroughput() {
         double queryLatencySum = queriesMetrics.stream().mapToDouble(QueryMetrics::getQueryLatency).sum();
         double totalTimeSeconds = (queryLatencySum / 1000.0);
@@ -237,6 +333,10 @@ public class Evaluation {
         this.query_throughput =  (queriesMetrics.size() / totalTimeSeconds);
     }
     
+    /**
+     * Method that calculate the median query latency
+     * 
+     */
     private void calculateMedianQueryLatency() {
         List<Double> queryLatency = queriesMetrics.stream().map(QueryMetrics::getQueryLatency).sorted().collect(Collectors.toList());
         if (queryLatency.size() %2  == 0) {
@@ -248,6 +348,12 @@ public class Evaluation {
         }
     }
 
+    /**
+     * Method that calculate the discounted cumulative gain of each query
+     * 
+     * @param queryId query id
+     * @param documentsRetrieved list of the retrieved documents
+     */
     private void calculateDCG(int queryId, List<Integer> documentsRetrieved) {
 
         Map<Integer, Integer> documentsRelevance = queriesMetrics.get(queryId - 1).getRelevantDocsWithRelevance(n_ratings);
@@ -266,6 +372,13 @@ public class Evaluation {
     }
     
 
+    /**
+     * Method that is the responsible to call all the methods that
+     * calculate the metrics of the query
+     * 
+     * @param queryID query id
+     * @param retrievedDocuments list of the retrieved documents 
+     */
     public void calculateQueryMeasures(int queryID, List<Integer> retrievedDocuments) {
         List<Integer> relevantDocuments = queriesMetrics.get(queryID - 1).getRelevantDocs(n_ratings);
         calculatePrecision(queryID, retrievedDocuments, relevantDocuments);
@@ -277,6 +390,11 @@ public class Evaluation {
         calculateDCG(queryID, retrievedDocuments);
     }
 
+    /**
+     * Method that is the responsible to call all the methods that
+     * calculate the metrics of the system
+     * 
+     */
     public void calculateSystemMeasures() {
         calculateMAP();
         calculateMAPatRank10();
@@ -288,6 +406,11 @@ public class Evaluation {
         calculateSystemFmeasure();
     }
 
+    /**
+     * Method that display a table with the values of the query metrics
+     * 
+     * @return table with the values of the query metrics
+     */
     private String displayQueriesMetrics() {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%s | %s | %s | %s  | %s | %s | %s | %s | %s\n", "Query Id", "Latency (ms)",
@@ -298,6 +421,12 @@ public class Evaluation {
         return sb.toString();
     }
 
+    /**
+     * Methods that prints on the console the results of the system evaluation
+     * 
+     * @param displayQueriesResults boolean that represents if the user want to see
+     * the results of the query metrics
+     */
     public void printResults(boolean displayQueriesResults){
         if(displayQueriesResults)
             System.out.println(displayQueriesMetrics());
@@ -317,10 +446,19 @@ public class Evaluation {
 
     }
 
+    /**
+     * Store or modify the relevance level of the relevant documents
+     * 
+     * @param n_ratings relevance level of the relevant documents
+     */
     public void setN_ratings(int n_ratings) {
         this.n_ratings = n_ratings;
     }
 
+    /**
+     * Method that restores the attributes of the class and of the QueryMetrics class
+     * 
+     */
     public void reset(){
         true_positives = 0.0;
         retrieved_docs = 0.0;
@@ -336,7 +474,5 @@ public class Evaluation {
 
         queriesMetrics.forEach(QueryMetrics::reset);
     }
-
-
 
 }

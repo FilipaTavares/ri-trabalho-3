@@ -4,7 +4,7 @@ import java.util.Locale;
 
 /**
  * This class represents regarding a given term a tuple (docID, wt_norm) which states that the term is present
- * in the document with the id docID and it appears termFreq times
+ * in the document with the id docID and it weight normalized
  */
 
 public class PostingWtNorm extends Posting {
@@ -14,7 +14,7 @@ public class PostingWtNorm extends Posting {
      * Creates a new instance of PostingWtNorm
      *
      * @param docID    the document id
-     * @param wt_norm t
+     * @param wt_norm  weight normalized
      */
 
     public PostingWtNorm(int docID, double wt_norm) {
@@ -23,6 +23,11 @@ public class PostingWtNorm extends Posting {
     }
 
 
+    /**
+     * Returns the weight normalized
+     * 
+     * @return weight normalized
+     */
     public double getWt_norm() {
         return wt_norm;
     }

@@ -3,17 +3,12 @@ package SearchEngine.QueryProcessing;
 import IndexerEngine.indexer.Indexer;
 import IndexerEngine.tokenizers.Tokenizer;
 import SearchEngine.Evaluation.Evaluation;
-import SearchEngine.ScoringAlgorithms.CosineScore;
-import SearchEngine.ScoringAlgorithms.ScoringAlgorithm;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 /**
- * Abstract class that contains a geral representation of the Boolean Retrieval model
+ * Abstract class that contains a geral representation of the Retrieval model
  */
 public abstract class Retrieval {
     protected List<Query> results;
@@ -30,6 +25,12 @@ public abstract class Retrieval {
     }
 
 
+    /**
+     * Abstract method that define a general representation of the retrieval system
+     * 
+     * @param queryId
+     * @param queryText 
+     */
     public abstract void retrieve(int queryId, String queryText);
 
     /**
@@ -40,6 +41,17 @@ public abstract class Retrieval {
 
     public abstract void saveToFile(String filename);
 
+    /**
+     * Method that evaluate an algorithm score.
+     * For each query, the retrieved documents have a score greater or equal
+     * than the threshold given as a argument. The relevant documents for each query depends
+     * on the relevance level given as a argument.
+     * 
+     * @param threshold fixed value of threshold
+     * @param n_ratings relevance level 
+     * @param displayQueryMetrics boolean that represents if the user want to see
+     * the results of the query metrics
+     */
     public void evaluateWithFixedThreshold(double threshold, int n_ratings, Boolean displayQueryMetrics) {
         System.out.println("Evaluating with fixed threshold: " + threshold + " and number of ratings: " + n_ratings + "\n");
         evaluation.setN_ratings(n_ratings);
@@ -61,6 +73,18 @@ public abstract class Retrieval {
         evaluation.reset();
     }
 
+    /**
+     * Method that evaluate an algorithm score.
+     * For each query, is got the maximum score where the retrieved documents 
+     * have a score greater or equal than the multiplication between the maximum
+     * score and threshold given as a argument. The relevant documents for each query depends
+     * on the relevance level given as a argument.
+     * 
+     * @param threshold variable value of threshold
+     * @param n_ratings relevance level
+     * @param displayQueryMetrics boolean that represents if the user want to see
+     * the results of the query metrics
+     */
     public void evaluateWithVariableThreshold(double threshold, int n_ratings, Boolean displayQueryMetrics) {
         System.out.println("Evaluating with variable threshold: max_score_value * " + threshold + " and number of ratings: " + n_ratings + "\n");
 
@@ -69,8 +93,6 @@ public abstract class Retrieval {
         for (Query query: results ) {
             Collection<Double> values = query.getDoc_scores().values();
             double max = Collections.max(values);
-            double min = Collections.min(values);
-
 
             List<Integer> documentsRetrieved = query.getDoc_scores().entrySet().stream()
                     .sorted((o1, o2) -> o1.getValue().equals(o2.getValue())
@@ -89,9 +111,9 @@ public abstract class Retrieval {
     }
 
     /**
-     * Store or modify the IndexerWtNorm object
+     * Store or modify the Indexer object
      * 
-     * @param indexer a new IndexerWtNorm object
+     * @param indexer a new Indexer object
      */
     public void setIndexer(Indexer indexer) {
         this.indexer = indexer;
@@ -107,6 +129,11 @@ public abstract class Retrieval {
     }
 
 
+    /**
+     * Store or modify the Evaluation objetct
+     * 
+     * @param evaluation a new Evaluation object
+     */
     public void setEvaluation(Evaluation evaluation) {
         this.evaluation = evaluation;
     }

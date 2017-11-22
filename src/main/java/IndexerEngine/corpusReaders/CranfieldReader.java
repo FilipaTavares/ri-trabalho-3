@@ -21,6 +21,11 @@ public class CranfieldReader implements CorpusReader {
         createSaxParser();
     }
 
+    /**
+     * Instantiation of only one object of the type SAXParserFactory and the type SaxParserHandler
+     * 
+     */
+    
     private void createSaxParser() {
         try {
             SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
@@ -38,7 +43,7 @@ public class CranfieldReader implements CorpusReader {
      * @param filename name of the file to be read/parsed
      * @return a document object generated from the file or null if occurs an error while parsing
      */
-
+    
     @Override
     public Document read(String filename) {
         try {

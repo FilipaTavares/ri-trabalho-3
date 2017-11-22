@@ -22,6 +22,7 @@ public class ComplexTokenizer implements Tokenizer {
 
     /**
      * Creates a new instance of the complex tokenizer
+     * @param stopfile file that contains the stopwords
      */
 
     public ComplexTokenizer(String stopfile) {
@@ -77,10 +78,20 @@ public class ComplexTokenizer implements Tokenizer {
         }
     }
 
+    /**
+     * Return the filename of the file that contains the stopwords
+     * 
+     * @return filename of the file that contains the stopwords
+     */
     public String getStopfile() {
         return stopfile;
     }
 
+    /**
+     * Store or modify the filename of the file that contains the stopwords
+     * 
+     * @param stopfile filename of the file that contains the stopwords
+     */
     public void setStopfile(String stopfile) {
         this.stopfile = stopfile;
     }

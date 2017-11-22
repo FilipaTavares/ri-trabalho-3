@@ -1,17 +1,18 @@
 package SearchEngine.QueryProcessing;
 
 import IndexerEngine.indexer.Indexer;
-import IndexerEngine.indexer.Posting;
-import IndexerEngine.indexer.PostingWtNorm;
 import IndexerEngine.tokenizers.Tokenizer;
 import SearchEngine.ScoringAlgorithms.CosineScore;
 import SearchEngine.Evaluation.Evaluation;
 
-import javax.swing.plaf.synth.SynthOptionPaneUI;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
+/**
+ * Class that implements a ranked retrieval system
+ * 
+ */
 public class RankedRetrieval extends Retrieval {
     private CosineScore score;
 
@@ -20,6 +21,13 @@ public class RankedRetrieval extends Retrieval {
         this.score = new CosineScore(indexer);
     }
 
+    /**
+     * Method that tokenize the text of the query, to get the list of terms and
+     * at the end, is computed the score of the documents for that query
+     * 
+     * @param queryID query id
+     * @param queryText text of the query
+     */
     @Override
     public void retrieve(int queryID, String queryText) {
         List<String> terms = tokenizer.tokenize(queryText);
@@ -35,7 +43,11 @@ public class RankedRetrieval extends Retrieval {
         evaluation.addQueryLatency(queryID, queryLatency / 1e6);
     }
 
-
+    /**
+     * Method that saves the score of the documents for each query in a file
+     * 
+     * @param filename output filename
+     */
     @Override
     public void saveToFile(String filename) {
         try (PrintWriter out = new PrintWriter(filename)) {

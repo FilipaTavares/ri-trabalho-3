@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Class that implements a disjunctive (OR) Boolean Retrieval model
@@ -53,10 +52,20 @@ public class DisjunctiveBooleanRetrieval extends Retrieval {
         evaluation.addQueryLatency(query_id, queryLatency / 1e6);
     }
 
+    /**
+     * Store or modify the object ScoringAlgorithm
+     * 
+     * @param scoringAlgorithm object ScoringAlgorithm
+     */
     public void setScoringAlgorithm(ScoringAlgorithm scoringAlgorithm) {
         this.scoringAlgorithm = scoringAlgorithm;
     }
 
+    /**
+     * Method that saves the score of the documents for each query in a file
+     * 
+     * @param filename output filename
+     */
     @Override
     public void saveToFile(String filename) {
         try (PrintWriter out = new PrintWriter(filename)) {

@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Class that compute the cosine similarity score for the query and each document vector
+ * 
+ */
 public class CosineScore {
     private Indexer indexer;
 
@@ -18,6 +22,13 @@ public class CosineScore {
         this.indexer = indexer;
     }
 
+    /**
+     * Method that calculate the score by the sum of the multiplications between the tf-idf weighting of
+     * the term query and the log-frequency weighting of the term document
+     * 
+     * @param query an object Query
+     * @param terms list of the query terms
+     */
     public void computeScores(Query query, List<String> terms) {
         Map<String, Double> wtQuery = normalizeQuery(terms);
         Map<Integer, Vector> docVectors = createDocVectors(terms);
@@ -31,6 +42,13 @@ public class CosineScore {
         }
     }
 
+    /**
+     * Method that calculates for each term of the query the respective 
+     * tf-idf weighting
+     * 
+     * @param terms list of terms
+     * @return tf-idf weighting for each term of the query
+     */
     private Map<String, Double> normalizeQuery(List<String> terms) {
         Map<String, Double> temp = new HashMap<>();
         int nDocs = indexer.getN_docs();
@@ -63,6 +81,13 @@ public class CosineScore {
         return temp;
     }
 
+    /**
+     * Method that creates objects of the type Vector that represents documents,
+     * which at least one term occurs in the document an in the query
+     * 
+     * @param terms list of terms
+     * @return map where the keys is the document id and the values an object Vector
+     */
     private Map<Integer, Vector> createDocVectors(List<String> terms) {
         Map<Integer, Vector> vec = new HashMap<>();
         for (String term : terms) {
